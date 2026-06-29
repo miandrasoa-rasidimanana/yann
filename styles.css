@@ -511,22 +511,34 @@ img { max-width: 100%; }
   font-size: .88rem;
   color: var(--c-muted);
 }
-.route-panel--error {
-  border-color: var(--c-red);
-  font-size: .88rem;
-  color: var(--c-red-ink);
-}
+.route-panel--error { border-color: var(--c-red); font-size: .88rem; color: var(--c-red-ink); }
+.route-panel--arrived { border-color: var(--c-green); }
+
 .route-panel__icon { font-size: 1.4rem; flex-shrink: 0; }
-.route-panel__body { display: flex; flex-direction: column; flex: 1; gap: 2px; }
-.route-panel__name { font-weight: 700; font-size: .92rem; }
+.route-panel__body { display: flex; flex-direction: column; flex: 1; gap: 2px; min-width: 0; }
+.route-panel__name { font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .route-panel__meta { font-size: .8rem; color: var(--c-muted); }
-.route-panel__maps {
-  color: var(--c-primary);
-  font-size: 1.1rem;
-  font-weight: 700;
-  padding: 4px 6px;
+
+/* Bouton "Naviguer" — lance Maps natif en navigation directe */
+.route-panel__launch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--c-primary);
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
   flex-shrink: 0;
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: opacity .15s;
 }
+.route-panel__launch:active { opacity: .8; }
+.route-panel__launch span:first-child { font-size: 1rem; }
+.route-panel__launch-lbl { font-size: .65rem; }
+
 .route-panel__close {
   color: var(--c-muted);
   font-size: 1rem;
@@ -576,6 +588,26 @@ img { max-width: 100%; }
   font-size: .9rem;
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+/* ── Marqueur "vous" pulsant (carte aide) ── */
+.me-pin { background: none !important; border: none !important; }
+.me-pin__dot {
+  display: block;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--c-primary);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 0 rgba(119,66,254,.5);
+  animation: pulse-me 2s ease-out infinite;
+}
+@keyframes pulse-me {
+  0%   { box-shadow: 0 0 0 0   rgba(119,66,254,.5); }
+  70%  { box-shadow: 0 0 0 14px rgba(119,66,254,0); }
+  100% { box-shadow: 0 0 0 0   rgba(119,66,254,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .me-pin__dot { animation: none; }
 }
 
 /* ── Leaflet tweaks ── */

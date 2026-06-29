@@ -7,8 +7,8 @@ const state = {
   hist: [],
   checks: {},
   geo: { status: 'idle', lat: null, lon: null, acc: null, addr: null },
-  nearby: [],          // POI pour l'écran Aide
-  nearbyStatus: 'idle' // idle | loading | ok | error
+  nearby: [],
+  nearbyStatus: 'idle',
 };
 
 const QUESTIONS = [
@@ -30,14 +30,12 @@ function go(screen) {
 }
 
 function back() {
-  if (state.screen === 'eval' && state.step > 0) {
-    state.step--;
-    renderEval();
-    return;
-  }
+  if (state.screen === 'eval' && state.step > 0) { state.step--; renderEval(); return; }
   const prev = state.hist.pop();
   if (!prev) return;
   state.screen = prev;
+  // Arrêter le suivi si on quitte l'écran aide
+  if (prev !== 'aide') stopWatch();
   render();
 }
 
@@ -61,10 +59,7 @@ function answerNo() {
   }
 }
 
-function startEval() {
-  state.step = 0;
-  go('eval');
-}
+function startEval() { state.step = 0; go('eval'); }
 
 /* ── Checklist ── */
 function toggle(id) {
@@ -78,7 +73,9 @@ function toggle(id) {
 /* ══════════════════════════════════════════════
    GÉOLOCALISATION
 ══════════════════════════════════════════════ */
-let maps = { urgence: null, aide: null };
+let maps       = { urgence: null, aide: null };
+let meMarker   = null;   // marqueur "vous" sur la carte aide (mis à jour par watchPosition)
+let watchId    = null;   // navigator.geolocation.watchPosition handle
 
 function locateUser(target) {
   target = target || 'urgence';
@@ -98,7 +95,6 @@ function locateUser(target) {
       state.geo.status = 'ok';
       renderGeoFor(target);
 
-      // Reverse geocoding (Nominatim)
       try {
         const r = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${state.geo.lat}&lon=${state.geo.lon}&zoom=18`,
@@ -109,23 +105,74 @@ function locateUser(target) {
         renderGeoFor(target);
       } catch (_) {}
 
-      // Chercher les POI uniquement en mode Aide
       if (target === 'aide') fetchNearby(state.geo.lat, state.geo.lon);
     },
-    () => {
-      state.geo.status = 'error';
-      renderGeoFor(target);
-    },
+    () => { state.geo.status = 'error'; renderGeoFor(target); },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
   );
 }
 
-/* ── Overpass API : fontaines, restaurants, cafés ── */
+/* ── watchPosition : suivi en temps réel pendant la marche ── */
+function startWatch() {
+  if (watchId !== null || !('geolocation' in navigator)) return;
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      // Mettre à jour le marqueur "vous" sur la carte
+      if (meMarker) meMarker.setLatLng([lat, lon]);
+      // Mettre à jour la distance restante dans le panneau
+      if (activeRouteIndex !== null && state.nearby[activeRouteIndex]) {
+        const poi = state.nearby[activeRouteIndex];
+        const remaining = haversine(lat, lon, poi.lat, poi.lon);
+        updateRemainingDist(remaining);
+        // Destination atteinte (< 20 m)
+        if (remaining < 20) onArrived();
+      }
+    },
+    () => {},
+    { enableHighAccuracy: true, maximumAge: 3000 }
+  );
+}
+
+function stopWatch() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+}
+
+function updateRemainingDist(meters) {
+  const el = document.getElementById('route-remaining');
+  if (!el) return;
+  const dist = meters >= 1000 ? (meters / 1000).toFixed(1) + ' km' : meters + ' m';
+  const minLeft = Math.ceil(meters / 83); // ~5 km/h → 83 m/min
+  el.textContent = `🚶 ~${minLeft} min restantes · ${dist}`;
+}
+
+function onArrived() {
+  stopWatch();
+  const panel = document.getElementById('route-panel');
+  if (panel) {
+    panel.innerHTML = `
+      <div class="route-panel route-panel--arrived">
+        <span class="route-panel__icon">✅</span>
+        <div class="route-panel__body">
+          <div class="route-panel__name">Vous êtes arrivé !</div>
+          <div class="route-panel__meta">Destination atteinte.</div>
+        </div>
+        <button class="route-panel__close" onclick="clearRoute()" aria-label="Fermer">✕</button>
+      </div>`;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   POI — OVERPASS API
+══════════════════════════════════════════════ */
 async function fetchNearby(lat, lon) {
   state.nearbyStatus = 'loading';
   renderNearby();
-
-  const radius = 800; // mètres
+  const radius = 800;
   const query = `
     [out:json][timeout:15];
     (
@@ -139,84 +186,52 @@ async function fetchNearby(lat, lon) {
   `;
   try {
     const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(query),
+      method: 'POST', body: 'data=' + encodeURIComponent(query),
     });
     const json = await res.json();
-    const elements = json.elements || [];
-
-    // Calcul de distance + enrichissement
-    state.nearby = elements
+    state.nearby = (json.elements || [])
       .map(el => ({
-        id: el.id,
-        lat: el.lat,
-        lon: el.lon,
+        id: el.id, lat: el.lat, lon: el.lon,
         name: el.tags?.name || labelAmenity(el.tags?.amenity),
         amenity: el.tags?.amenity,
         dist: haversine(lat, lon, el.lat, el.lon),
       }))
       .sort((a, b) => a.dist - b.dist)
-      .slice(0, 8); // garder 8 pour les marqueurs, afficher 3 en liste
-
+      .slice(0, 8);
     state.nearbyStatus = 'ok';
   } catch (_) {
     state.nearbyStatus = 'error';
   }
   renderNearby();
-  // Ajouter les marqueurs POI sur la carte Aide si elle est déjà prête
   addPoiMarkers();
 }
 
 function labelAmenity(type) {
-  const labels = {
-    drinking_water: 'Fontaine d\'eau',
-    restaurant: 'Restaurant',
-    cafe: 'Café',
-    fast_food: 'Restauration rapide',
-    bar: 'Bar',
-  };
-  return labels[type] || 'Point d\'intérêt';
+  return { drinking_water: 'Fontaine d\'eau', restaurant: 'Restaurant', cafe: 'Café', fast_food: 'Restauration rapide', bar: 'Bar' }[type] || 'Point d\'intérêt';
 }
-
 function iconAmenity(type) {
-  const icons = {
-    drinking_water: '💧',
-    restaurant: '🍽️',
-    cafe: '☕',
-    fast_food: '🥙',
-    bar: '🍹',
-  };
-  return icons[type] || '📍';
+  return { drinking_water: '💧', restaurant: '🍽️', cafe: '☕', fast_food: '🥙', bar: '🍹' }[type] || '📍';
 }
-
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  const R = 6371000, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-/* ── Marqueurs POI sur la carte Aide ── */
+/* ── Marqueurs POI ── */
 let poiMarkers = [];
-let activeRouteLine = null;
 
 function addPoiMarkers() {
   const map = maps.aide;
   if (!map || !state.nearby.length) return;
-
-  // Nettoyer les anciens marqueurs
   poiMarkers.forEach(m => m.remove());
   poiMarkers = [];
-
   state.nearby.forEach((poi, index) => {
     const color = poi.amenity === 'drinking_water' ? '#0F8A5B' : '#7742FE';
     const icon = L.divIcon({
       className: 'poi-pin',
       html: `<span class="poi-pin__dot" style="background:${color}">${iconAmenity(poi.amenity)}</span>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [32, 32], iconAnchor: [16, 16],
     });
     const marker = L.marker([poi.lat, poi.lon], { icon })
       .addTo(map)
@@ -226,58 +241,78 @@ function addPoiMarkers() {
   });
 }
 
-/* ── Itinéraire OSRM (pied) ── */
+/* ══════════════════════════════════════════════
+   ITINÉRAIRE — OSRM + watchPosition
+══════════════════════════════════════════════ */
+let activeRouteLine  = null;
+let activeRouteIndex = null;
+
 async function showRoute(poiIndex) {
   const poi = state.nearby[poiIndex];
   const map = maps.aide;
   if (!poi || !map || !state.geo.lat) return;
 
-  // Panneau chargement
+  activeRouteIndex = poiIndex;
   renderRoutePanel({ status: 'loading', poi });
-
-  // Supprimer l'ancien tracé
   if (activeRouteLine) { activeRouteLine.remove(); activeRouteLine = null; }
 
   try {
     const url = `https://router.project-osrm.org/route/v1/foot/${state.geo.lon},${state.geo.lat};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await fetch(url).then(r => r.json());
+    if (data.code !== 'Ok' || !data.routes.length) throw new Error();
 
-    if (data.code !== 'Ok' || !data.routes.length) throw new Error('no route');
-
-    const route = data.routes[0];
-    const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
-    const distM  = Math.round(route.distance);
+    const route   = data.routes[0];
+    const coords  = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+    const distM   = Math.round(route.distance);
     const minWalk = Math.ceil(route.duration / 60);
 
-    // Tracer la polyligne
     activeRouteLine = L.polyline(coords, {
-      color: '#7742FE',
-      weight: 5,
-      opacity: 0.85,
-      lineJoin: 'round',
+      color: '#7742FE', weight: 5, opacity: 0.85, lineJoin: 'round',
     }).addTo(map);
-
-    // Zoomer pour voir tout le tracé
     map.fitBounds(activeRouteLine.getBounds(), { padding: [24, 24] });
 
     renderRoutePanel({ status: 'ok', poi, distM, minWalk, poiIndex });
+    startWatch(); // démarrer le suivi GPS en marchant
   } catch (_) {
-    renderRoutePanel({ status: 'error', poi, poiIndex });
+    renderRoutePanel({ status: 'error', poi });
   }
 }
 
 function clearRoute() {
+  stopWatch();
+  activeRouteIndex = null;
   if (activeRouteLine) { activeRouteLine.remove(); activeRouteLine = null; }
   const panel = document.getElementById('route-panel');
   if (panel) panel.innerHTML = '';
-  // Recentrer sur la position actuelle
-  if (maps.aide && state.geo.lat) {
-    maps.aide.setView([state.geo.lat, state.geo.lon], 15);
+  if (maps.aide && state.geo.lat) maps.aide.setView([state.geo.lat, state.geo.lon], 15);
+}
+
+/* ── Deep link navigation native (iOS / Android / desktop) ── */
+function launchNavigation(toLat, toLon) {
+  const from = state.geo;
+  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/.test(navigator.userAgent);
+
+  if (isIOS) {
+    // Apple Maps avec mode marche et origine pré-remplie
+    window.location.href = `maps://?saddr=${from.lat},${from.lon}&daddr=${toLat},${toLon}&dirflg=w`;
+    // Fallback Google Maps après 1.5s si Apple Maps ne s'ouvre pas
+    setTimeout(() => {
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lon}&destination=${toLat},${toLon}&travelmode=walking`);
+    }, 1500);
+  } else if (isAndroid) {
+    // Intent Google Maps navigation directe
+    window.location.href = `google.navigation:q=${toLat},${toLon}&mode=w`;
+    setTimeout(() => {
+      window.open(`https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lon}&destination=${toLat},${toLon}&travelmode=walking`);
+    }, 1500);
+  } else {
+    // Desktop : Google Maps directions
+    window.open(`https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lon}&destination=${toLat},${toLon}&travelmode=walking`);
   }
 }
 
-function renderRoutePanel({ status, poi, distM, minWalk, poiIndex }) {
+function renderRoutePanel({ status, poi, distM, minWalk }) {
   const panel = document.getElementById('route-panel');
   if (!panel) return;
 
@@ -293,23 +328,24 @@ function renderRoutePanel({ status, poi, distM, minWalk, poiIndex }) {
     panel.innerHTML = `
       <div class="route-panel route-panel--error">
         <span>Itinéraire indisponible.</span>
-        <button class="route-panel__close" onclick="clearRoute()" aria-label="Fermer">✕</button>
+        <button class="route-panel__close" onclick="clearRoute()">✕</button>
       </div>`;
     return;
   }
 
   const dist = distM >= 1000 ? (distM / 1000).toFixed(1) + ' km' : distM + ' m';
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lon}&travelmode=walking`;
 
   panel.innerHTML = `
     <div class="route-panel">
       <div class="route-panel__icon">${iconAmenity(poi.amenity)}</div>
       <div class="route-panel__body">
         <div class="route-panel__name">${poi.name}</div>
-        <div class="route-panel__meta">🚶 ${minWalk} min · ${dist}</div>
+        <div class="route-panel__meta" id="route-remaining">🚶 ${minWalk} min · ${dist}</div>
       </div>
-      <a class="route-panel__maps" href="${mapsUrl}" target="_blank" rel="noopener" title="Ouvrir dans Maps">↗</a>
-      <button class="route-panel__close" onclick="clearRoute()" aria-label="Fermer l'itinéraire">✕</button>
+      <button class="route-panel__launch" onclick="launchNavigation(${poi.lat},${poi.lon})" title="Lancer la navigation GPS">
+        <span>▶</span><span class="route-panel__launch-lbl">Naviguer</span>
+      </button>
+      <button class="route-panel__close" onclick="clearRoute()" aria-label="Fermer">✕</button>
     </div>`;
 }
 
@@ -317,8 +353,7 @@ function renderRoutePanel({ status, poi, distM, minWalk, poiIndex }) {
    RENDU CARTE
 ══════════════════════════════════════════════ */
 function renderGeoFor(target) {
-  const wrapId = target === 'aide' ? 'geo-wrap-aide' : 'geo-wrap';
-  const wrap = document.getElementById(wrapId);
+  const wrap = document.getElementById(target === 'aide' ? 'geo-wrap-aide' : 'geo-wrap');
   if (!wrap) return;
 
   if (state.geo.status === 'loading') {
@@ -326,18 +361,16 @@ function renderGeoFor(target) {
     return;
   }
   if (state.geo.status === 'error') {
-    const btnFn = `locateUser('${target}')`;
     wrap.innerHTML = `<div class="geo-state">
-      <p>Position indisponible. ${target === 'urgence' ? 'Donnez votre adresse et des repères aux secours.' : 'Activez la localisation pour afficher les points à proximité.'}</p>
-      <button class="btn btn--${target === 'aide' ? 'green' : 'primary'} btn--sm" onclick="${btnFn}">Réessayer</button>
+      <p>${target === 'urgence' ? 'Position indisponible. Donnez votre adresse et des repères aux secours.' : 'Activez la localisation pour afficher les points à proximité.'}</p>
+      <button class="btn btn--${target === 'aide' ? 'green' : 'primary'} btn--sm" onclick="locateUser('${target}')">Réessayer</button>
     </div>`;
     return;
   }
   if (state.geo.status === 'ok' && state.geo.lat) {
-    const mapElId = `leaflet-map-${target}`;
     const mapsUrl = `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lon}`;
     wrap.innerHTML = `
-      <div class="geo-card__map" id="${mapElId}"></div>
+      <div class="geo-card__map" id="leaflet-map-${target}"></div>
       <div class="geo-card__info">
         ${state.geo.addr ? `<p class="geo-card__addr">${state.geo.addr}</p>` : ''}
         <p class="geo-card__coords">${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)}${state.geo.acc ? ` · ± ${state.geo.acc} m` : ''}</p>
@@ -349,44 +382,43 @@ function renderGeoFor(target) {
     initLeafletFor(target);
     return;
   }
-  const btnColor = target === 'aide' ? 'green' : 'primary';
   const btnLabel = target === 'aide' ? 'Voir les points à proximité' : 'Localiser';
   wrap.innerHTML = `<div class="geo-state">
     <p>${target === 'aide' ? 'Trouvez de l\'eau et des lieux frais à proximité.' : 'Activez la localisation pour transmettre votre position aux secours.'}</p>
-    <button class="btn btn--${btnColor} btn--sm" onclick="locateUser('${target}')">${btnLabel}</button>
+    <button class="btn btn--${target === 'aide' ? 'green' : 'primary'} btn--sm" onclick="locateUser('${target}')">${btnLabel}</button>
   </div>`;
 }
 
 function initLeafletFor(target) {
   if (typeof L === 'undefined') return;
-  const mapElId = `leaflet-map-${target}`;
-  const el = document.getElementById(mapElId);
+  const el = document.getElementById(`leaflet-map-${target}`);
   if (!el) return;
-
   if (maps[target]) { maps[target].remove(); maps[target] = null; }
 
   maps[target] = L.map(el, { zoomControl: true }).setView([state.geo.lat, state.geo.lon], 15);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '© OpenStreetMap'
+    maxZoom: 19, attribution: '© OpenStreetMap',
   }).addTo(maps[target]);
 
-  // Marqueur position actuelle
+  // Marqueur "vous êtes ici" — pulsant sur la carte aide
+  const isPulse = target === 'aide';
   const meIcon = L.divIcon({
-    className: 'geo-pin',
-    html: '<span class="geo-pin__dot"></span>',
-    iconSize: [18, 18], iconAnchor: [9, 9],
+    className: isPulse ? 'me-pin' : 'geo-pin',
+    html: isPulse ? '<span class="me-pin__dot"></span>' : '<span class="geo-pin__dot"></span>',
+    iconSize: [22, 22], iconAnchor: [11, 11],
   });
-  L.marker([state.geo.lat, state.geo.lon], { icon: meIcon })
+  const marker = L.marker([state.geo.lat, state.geo.lon], { icon: meIcon })
     .addTo(maps[target])
     .bindPopup('Vous êtes ici');
 
-  setTimeout(() => maps[target] && maps[target].invalidateSize(), 80);
+  // Garder la référence du marqueur "moi" pour le mettre à jour avec watchPosition
+  if (target === 'aide') meMarker = marker;
 
-  // Si les POI sont déjà chargés, les ajouter tout de suite
+  setTimeout(() => maps[target] && maps[target].invalidateSize(), 80);
   if (target === 'aide' && state.nearby.length) addPoiMarkers();
 }
 
-/* ── Liste des POI (3 premiers) ── */
+/* ── Liste des POI ── */
 function renderNearby() {
   const el = document.getElementById('nearby-list');
   if (!el) return;
@@ -396,7 +428,7 @@ function renderNearby() {
     return;
   }
   if (state.nearbyStatus === 'error') {
-    el.innerHTML = `<p class="nearby-empty">Impossible de récupérer les points à proximité. Vérifiez votre connexion.</p>`;
+    el.innerHTML = `<p class="nearby-empty">Impossible de récupérer les points à proximité.</p>`;
     return;
   }
   if (!state.nearby.length) {
@@ -404,11 +436,8 @@ function renderNearby() {
     return;
   }
 
-  const top3 = state.nearby.slice(0, 3);
-  el.innerHTML = top3.map((poi, index) => {
-    const dist = poi.dist >= 1000
-      ? (poi.dist / 1000).toFixed(1) + ' km'
-      : poi.dist + ' m';
+  el.innerHTML = state.nearby.slice(0, 3).map((poi, index) => {
+    const dist = poi.dist >= 1000 ? (poi.dist / 1000).toFixed(1) + ' km' : poi.dist + ' m';
     return `
       <button class="nearby-item" onclick="showRoute(${index})" aria-label="Itinéraire vers ${poi.name}, à ${dist}">
         <span class="nearby-icon">${iconAmenity(poi.amenity)}</span>
@@ -431,19 +460,19 @@ function shareHelp() {
   if (navigator.share) {
     navigator.share({ title: 'YANN — Demande d\'aide', text }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(text).then(() => alert('Message copié dans le presse-papiers !')).catch(() => alert(text));
+    navigator.clipboard.writeText(text).then(() => alert('Message copié !')).catch(() => alert(text));
   }
 }
 
-/* ── Render helpers ── */
+/* ── Render ── */
 function renderEval() {
   const pct = ((state.step + 1) / QUESTIONS.length * 100).toFixed(0);
   const fill = document.getElementById('prog-fill');
   const lbl  = document.getElementById('prog-label');
   const qtxt = document.getElementById('question-text');
-  if (fill)  fill.style.width = pct + '%';
-  if (lbl)   lbl.textContent = `Question ${state.step + 1} / ${QUESTIONS.length}`;
-  if (qtxt)  qtxt.textContent = QUESTIONS[state.step];
+  if (fill) fill.style.width = pct + '%';
+  if (lbl)  lbl.textContent = `Question ${state.step + 1} / ${QUESTIONS.length}`;
+  if (qtxt) qtxt.textContent = QUESTIONS[state.step];
 }
 
 function render() {
@@ -459,7 +488,5 @@ function render() {
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
   render();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 });
