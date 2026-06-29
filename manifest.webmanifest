@@ -1,0 +1,14 @@
+{
+  "name": "YANN",
+  "short_name": "YANN",
+  "description": "Aide au secours d'une personne vulnérable (malaise / coup de chaleur). Sans compte, sans connexion.",
+  "lang": "fr",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5EFFD",
+  "theme_color": "#7742FE",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

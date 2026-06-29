@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#7742FE">
+  <meta name="description" content="YANN — Vous êtes témoin d'un malaise ou d'un coup de chaleur ? On vous guide, pas à pas. Sans compte, sans connexion.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+  <title>YANN</title>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════════════════════════════════
+       ACCUEIL
+  ══════════════════════════════════════════ -->
+  <div id="screen-home" class="screen active">
+    <div class="screen-body screen-body--home">
+      <div class="hero">
+        <div class="hero__logo">
+          <!-- Logo YANN : hippopotame avec lunettes et parapluie médical -->
+          <svg viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Logo YANN">
+            <!-- Parapluie -->
+            <path d="M60 18 Q60 4 80 8 Q100 12 100 28 Q80 22 60 28 Q40 22 20 28 Q20 12 40 8 Q60 4 60 18Z"
+                  stroke="#7742FE" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+            <line x1="60" y1="18" x2="60" y2="54" stroke="#7742FE" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Croix médicale sur le parapluie -->
+            <line x1="60" y1="10" x2="60" y2="18" stroke="#7742FE" stroke-width="2" stroke-linecap="round"/>
+            <text x="60" y="24" text-anchor="middle" font-size="9" font-weight="700" fill="#7742FE" font-family="sans-serif">+</text>
+            <!-- Oreilles -->
+            <ellipse cx="30" cy="68" rx="9" ry="8" fill="none" stroke="#7742FE" stroke-width="2.5"/>
+            <ellipse cx="90" cy="68" rx="9" ry="8" fill="none" stroke="#7742FE" stroke-width="2.5"/>
+            <!-- Tête -->
+            <rect x="26" y="58" width="68" height="58" rx="22" fill="none" stroke="#7742FE" stroke-width="2.5"/>
+            <!-- Lunettes -->
+            <rect x="32" y="70" width="22" height="14" rx="6" fill="none" stroke="#7742FE" stroke-width="2.2"/>
+            <rect x="66" y="70" width="22" height="14" rx="6" fill="none" stroke="#7742FE" stroke-width="2.2"/>
+            <line x1="54" y1="77" x2="66" y2="77" stroke="#7742FE" stroke-width="2" stroke-linecap="round"/>
+            <line x1="28" y1="76" x2="32" y2="76" stroke="#7742FE" stroke-width="2" stroke-linecap="round"/>
+            <line x1="88" y1="76" x2="92" y2="76" stroke="#7742FE" stroke-width="2" stroke-linecap="round"/>
+            <!-- Narines -->
+            <circle cx="48" cy="96" r="3.5" fill="#7742FE"/>
+            <circle cx="72" cy="96" r="3.5" fill="#7742FE"/>
+          </svg>
+        </div>
+        <div class="hero__name">YANN</div>
+        <p class="hero__sub">Vous êtes témoin d'un malaise ou d'un coup de chaleur&nbsp;? On vous guide, pas à pas.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn--primary" onclick="startEval()">🚨 Démarrer une alerte</button>
+        <button class="btn btn--ghost" onclick="go('info')">Informations &amp; numéros utiles</button>
+      </div>
+
+      <p class="foot-note">Sans compte, sans connexion.<br><strong>En cas de danger immédiat, appelez le 112.</strong></p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉVALUATION
+  ══════════════════════════════════════════ -->
+  <div id="screen-eval" class="screen">
+    <div class="topbar">
+      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
+      <h1 class="topbar__title">Évaluation</h1>
+      <span class="topbar__spacer"></span>
+    </div>
+    <div class="screen-body">
+      <div class="progress-wrap">
+        <span class="progress-label" id="prog-label">Question 1 / 5</span>
+        <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:20%"></div></div>
+      </div>
+
+      <p id="question-text" class="question-text"></p>
+      <p class="question-hint">En cas de doute, répondez « Oui ».</p>
+
+      <div class="spacer"></div>
+
+      <div class="btn-row">
+        <button class="btn btn--red btn--yesno" onclick="answerYes()">Oui</button>
+        <button class="btn btn--ghost btn--yesno" onclick="answerNo()">Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       URGENCE
+  ══════════════════════════════════════════ -->
+  <div id="screen-urgence" class="screen">
+    <div class="topbar">
+      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
+      <h1 class="topbar__title">Urgence</h1>
+      <span class="topbar__spacer"></span>
+    </div>
+    <div class="screen-body">
+
+      <div class="banner banner--urgence">
+        <div class="banner__title">⚠️ Appelez les secours maintenant</div>
+        <div class="banner__sub">Au moins un signe critique a été repéré.</div>
+      </div>
+
+      <a class="btn btn--red" href="tel:112" aria-label="Appeler le 112 — Urgences">
+        📞 Appeler le 112
+      </a>
+
+      <div class="num-grid">
+        <a class="num-card" href="tel:15" aria-label="Appeler le 15 — SAMU">
+          <span class="num-card__num">15</span>
+          <span class="num-card__label">SAMU</span>
+        </a>
+        <a class="num-card" href="tel:18" aria-label="Appeler le 18 — Pompiers">
+          <span class="num-card__num">18</span>
+          <span class="num-card__label">Pompiers</span>
+        </a>
+        <a class="num-card" href="sms:114" aria-label="SMS au 114 — Sourds">
+          <span class="num-card__num">114</span>
+          <span class="num-card__label">SMS</span>
+        </a>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">📍 Votre position à communiquer</h3>
+        <div class="geo-card" id="geo-wrap">
+          <div class="geo-state">
+            <p>Activez la localisation pour transmettre votre position aux secours.</p>
+            <button class="btn btn--primary btn--sm" onclick="locateUser()">Localiser</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">📢 Quoi dire au téléphone</h3>
+        <div class="card">
+          <ul class="checklist" id="list-say">
+            <li><button class="check-item" data-check="say-1" onclick="toggle('say-1')"><span class="check-box"></span><span class="check-label">Où vous êtes : adresse précise et points de repère</span></button></li>
+            <li><button class="check-item" data-check="say-2" onclick="toggle('say-2')"><span class="check-box"></span><span class="check-label">Ce qui se passe et l'état de la personne</span></button></li>
+            <li><button class="check-item" data-check="say-3" onclick="toggle('say-3')"><span class="check-box"></span><span class="check-label">Si elle est consciente et si elle respire</span></button></li>
+            <li><button class="check-item" data-check="say-4" onclick="toggle('say-4')"><span class="check-box"></span><span class="check-label">Son âge approximatif</span></button></li>
+            <li><button class="check-item" data-check="say-5" onclick="toggle('say-5')"><span class="check-box"></span><span class="check-label">Ne raccrochez pas avant qu'on vous le demande</span></button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">🤲 Gestes en attendant les secours</h3>
+        <div class="card">
+          <ul class="checklist">
+            <li><button class="check-item" data-check="wait-1" onclick="toggle('wait-1')"><span class="check-box"></span><span class="check-label">Allongez la personne à l'ombre, au frais</span></button></li>
+            <li><button class="check-item" data-check="wait-2" onclick="toggle('wait-2')"><span class="check-box"></span><span class="check-label">Desserrez ses vêtements</span></button></li>
+            <li><button class="check-item" data-check="wait-3" onclick="toggle('wait-3')"><span class="check-box"></span><span class="check-label">Rafraîchissez-la : eau, linge humide, éventez</span></button></li>
+            <li><button class="check-item" data-check="wait-4" onclick="toggle('wait-4')"><span class="check-box"></span><span class="check-label">Parlez-lui et surveillez sa respiration</span></button></li>
+            <li><button class="check-item" data-check="wait-5" onclick="toggle('wait-5')"><span class="check-box"></span><span class="check-label">Inconsciente mais respire : position latérale de sécurité</span></button></li>
+          </ul>
+        </div>
+      </div>
+
+      <button class="btn btn--ghost" onclick="go('alert')">👥 Alerter les personnes autour</button>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       AIDE
+  ══════════════════════════════════════════ -->
+  <div id="screen-aide" class="screen">
+    <div class="topbar">
+      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
+      <h1 class="topbar__title">Aide</h1>
+      <span class="topbar__spacer"></span>
+    </div>
+    <div class="screen-body">
+
+      <div class="banner banner--aide">
+        <div class="banner__title">✅ Aidez la personne à récupérer</div>
+        <div class="banner__sub">Aucun signe critique repéré. Restez près d'elle et vigilant.</div>
+      </div>
+
+      <div class="reflex-grid">
+        <div class="reflex-card">
+          <div class="reflex-badge">1</div>
+          <div class="reflex-title">💧 Eau</div>
+          <div class="reflex-sub">De l'eau fraîche, à petites gorgées.</div>
+        </div>
+        <div class="reflex-card">
+          <div class="reflex-badge">2</div>
+          <div class="reflex-title">🌳 Ombre</div>
+          <div class="reflex-sub">À l'abri du soleil et de la chaleur.</div>
+        </div>
+        <div class="reflex-card">
+          <div class="reflex-badge">3</div>
+          <div class="reflex-title">❄️ Fraîcheur</div>
+          <div class="reflex-sub">Rafraîchir nuque, visage et bras.</div>
+        </div>
+        <div class="reflex-card">
+          <div class="reflex-badge">4</div>
+          <div class="reflex-title">🙋 Aide</div>
+          <div class="reflex-sub">Rester avec elle, appeler du monde.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">🤲 Gestes à faire</h3>
+        <div class="card">
+          <ul class="checklist">
+            <li><button class="check-item" data-check="aide-1" onclick="toggle('aide-1')"><span class="check-box"></span><span class="check-label">Installez-la assise ou allongée au calme</span></button></li>
+            <li><button class="check-item" data-check="aide-2" onclick="toggle('aide-2')"><span class="check-box"></span><span class="check-label">Desserrez ses vêtements</span></button></li>
+            <li><button class="check-item" data-check="aide-3" onclick="toggle('aide-3')"><span class="check-box"></span><span class="check-label">Faites-la boire par petites gorgées si elle est consciente</span></button></li>
+            <li><button class="check-item" data-check="aide-4" onclick="toggle('aide-4')"><span class="check-box"></span><span class="check-label">Surveillez son état pendant quelques minutes</span></button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">🔗 Relais &amp; accompagnement</h3>
+        <div class="msg-card">Prévenez un proche si possible, ou orientez la personne vers une association, une téléassistance ou un professionnel de santé. Restez avec elle jusqu'au relais.</div>
+      </div>
+
+      <button class="btn btn--green" onclick="go('alert')">👥 Alerter les personnes autour</button>
+      <button class="btn btn--ghost-red" onclick="go('urgence')">⚠️ L'état s'aggrave ? Appeler les secours</button>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ALERTER AUTOUR
+  ══════════════════════════════════════════ -->
+  <div id="screen-alert" class="screen">
+    <div class="topbar">
+      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
+      <h1 class="topbar__title">Alerter autour</h1>
+      <span class="topbar__spacer"></span>
+    </div>
+    <div class="screen-body">
+
+      <div class="banner banner--violet">
+        <div class="banner__title">👥 Mobilisez les personnes présentes</div>
+        <div class="banner__sub">Vous n'êtes pas seul. Devenez les yeux et les mains de l'entraide autour de vous.</div>
+      </div>
+
+      <button class="btn btn--primary" onclick="shareHelp()">📲 Partager la demande d'aide</button>
+
+      <div class="section">
+        <h3 class="section__title">À faire autour de vous</h3>
+        <div class="card">
+          <ul class="checklist">
+            <li><button class="check-item" data-check="al-1" onclick="toggle('al-1')"><span class="check-box"></span><span class="check-label">Désignez quelqu'un pour appeler les secours</span></button></li>
+            <li><button class="check-item" data-check="al-2" onclick="toggle('al-2')"><span class="check-box"></span><span class="check-label">Demandez de l'eau et de l'ombre</span></button></li>
+            <li><button class="check-item" data-check="al-3" onclick="toggle('al-3')"><span class="check-box"></span><span class="check-label">Dégagez l'espace autour de la personne</span></button></li>
+            <li><button class="check-item" data-check="al-4" onclick="toggle('al-4')"><span class="check-box"></span><span class="check-label">Cherchez un secouriste ou un professionnel à proximité</span></button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">💬 Message à partager</h3>
+        <div class="msg-card">Une personne a besoin d'aide ici. Pouvez-vous venir m'aider, apporter de l'eau, ou appeler les secours (112) ?</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       INFORMATIONS
+  ══════════════════════════════════════════ -->
+  <div id="screen-info" class="screen">
+    <div class="topbar">
+      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
+      <h1 class="topbar__title">Informations</h1>
+      <span class="topbar__spacer"></span>
+    </div>
+    <div class="screen-body">
+
+      <div class="section">
+        <h3 class="section__title">📞 Numéros d'urgence</h3>
+        <div class="card">
+          <ul class="num-list">
+            <li><a class="num-row" href="tel:112" aria-label="Appeler le 112"><span class="num-row__n">112</span><span class="num-row__lbl">Urgences (Europe)</span></a></li>
+            <li><a class="num-row" href="tel:15"  aria-label="Appeler le 15"><span class="num-row__n">15</span><span class="num-row__lbl">SAMU — urgence médicale</span></a></li>
+            <li><a class="num-row" href="tel:18"  aria-label="Appeler le 18"><span class="num-row__n">18</span><span class="num-row__lbl">Pompiers</span></a></li>
+            <li><a class="num-row" href="sms:114" aria-label="SMS au 114"><span class="num-row__n">114</span><span class="num-row__lbl">Sourds &amp; malentendants (SMS)</span></a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">🌡️ Reconnaître un coup de chaleur</h3>
+        <div class="card">
+          <ul class="dot-list">
+            <li>Température corporelle très élevée</li>
+            <li>Peau rouge et chaude, parfois sèche</li>
+            <li>Maux de tête, vertiges, nausées</li>
+            <li>Confusion, somnolence, perte de connaissance</li>
+            <li>Respiration et pouls rapides</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">🤲 Gestes qui sauvent</h3>
+        <div class="msg-card">Mettre à l'ombre, allonger, desserrer les vêtements, rafraîchir, faire boire si la personne est consciente, surveiller — et appeler le 112 si l'état s'aggrave.</div>
+      </div>
+
+      <p class="disclaimer"><strong>YANN ne remplace pas un avis médical ni les secours.</strong><br>En cas de doute, appelez le 112.</p>
+
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
