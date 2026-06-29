@@ -199,11 +199,18 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 /* ── Marqueurs POI sur la carte Aide ── */
+let poiMarkers = [];
+let activeRouteLine = null;
+
 function addPoiMarkers() {
   const map = maps.aide;
   if (!map || !state.nearby.length) return;
 
-  state.nearby.forEach(poi => {
+  // Nettoyer les anciens marqueurs
+  poiMarkers.forEach(m => m.remove());
+  poiMarkers = [];
+
+  state.nearby.forEach((poi, index) => {
     const color = poi.amenity === 'drinking_water' ? '#0F8A5B' : '#7742FE';
     const icon = L.divIcon({
       className: 'poi-pin',
@@ -211,10 +218,99 @@ function addPoiMarkers() {
       iconSize: [32, 32],
       iconAnchor: [16, 16],
     });
-    L.marker([poi.lat, poi.lon], { icon })
+    const marker = L.marker([poi.lat, poi.lon], { icon })
       .addTo(map)
-      .bindPopup(`<strong>${poi.name}</strong><br>${poi.dist} m`);
+      .bindPopup(`<strong>${poi.name}</strong><br>${poi.dist} m`)
+      .on('click', () => showRoute(index));
+    poiMarkers.push(marker);
   });
+}
+
+/* ── Itinéraire OSRM (pied) ── */
+async function showRoute(poiIndex) {
+  const poi = state.nearby[poiIndex];
+  const map = maps.aide;
+  if (!poi || !map || !state.geo.lat) return;
+
+  // Panneau chargement
+  renderRoutePanel({ status: 'loading', poi });
+
+  // Supprimer l'ancien tracé
+  if (activeRouteLine) { activeRouteLine.remove(); activeRouteLine = null; }
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/foot/${state.geo.lon},${state.geo.lat};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.code !== 'Ok' || !data.routes.length) throw new Error('no route');
+
+    const route = data.routes[0];
+    const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+    const distM  = Math.round(route.distance);
+    const minWalk = Math.ceil(route.duration / 60);
+
+    // Tracer la polyligne
+    activeRouteLine = L.polyline(coords, {
+      color: '#7742FE',
+      weight: 5,
+      opacity: 0.85,
+      lineJoin: 'round',
+    }).addTo(map);
+
+    // Zoomer pour voir tout le tracé
+    map.fitBounds(activeRouteLine.getBounds(), { padding: [24, 24] });
+
+    renderRoutePanel({ status: 'ok', poi, distM, minWalk, poiIndex });
+  } catch (_) {
+    renderRoutePanel({ status: 'error', poi, poiIndex });
+  }
+}
+
+function clearRoute() {
+  if (activeRouteLine) { activeRouteLine.remove(); activeRouteLine = null; }
+  const panel = document.getElementById('route-panel');
+  if (panel) panel.innerHTML = '';
+  // Recentrer sur la position actuelle
+  if (maps.aide && state.geo.lat) {
+    maps.aide.setView([state.geo.lat, state.geo.lon], 15);
+  }
+}
+
+function renderRoutePanel({ status, poi, distM, minWalk, poiIndex }) {
+  const panel = document.getElementById('route-panel');
+  if (!panel) return;
+
+  if (status === 'loading') {
+    panel.innerHTML = `
+      <div class="route-panel route-panel--loading">
+        <span class="spinner spinner--sm"></span>
+        <span>Calcul de l'itinéraire vers <strong>${poi.name}</strong>…</span>
+      </div>`;
+    return;
+  }
+  if (status === 'error') {
+    panel.innerHTML = `
+      <div class="route-panel route-panel--error">
+        <span>Itinéraire indisponible.</span>
+        <button class="route-panel__close" onclick="clearRoute()" aria-label="Fermer">✕</button>
+      </div>`;
+    return;
+  }
+
+  const dist = distM >= 1000 ? (distM / 1000).toFixed(1) + ' km' : distM + ' m';
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lon}&travelmode=walking`;
+
+  panel.innerHTML = `
+    <div class="route-panel">
+      <div class="route-panel__icon">${iconAmenity(poi.amenity)}</div>
+      <div class="route-panel__body">
+        <div class="route-panel__name">${poi.name}</div>
+        <div class="route-panel__meta">🚶 ${minWalk} min · ${dist}</div>
+      </div>
+      <a class="route-panel__maps" href="${mapsUrl}" target="_blank" rel="noopener" title="Ouvrir dans Maps">↗</a>
+      <button class="route-panel__close" onclick="clearRoute()" aria-label="Fermer l'itinéraire">✕</button>
+    </div>`;
 }
 
 /* ══════════════════════════════════════════════
@@ -309,20 +405,19 @@ function renderNearby() {
   }
 
   const top3 = state.nearby.slice(0, 3);
-  el.innerHTML = top3.map(poi => {
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lon}`;
+  el.innerHTML = top3.map((poi, index) => {
     const dist = poi.dist >= 1000
       ? (poi.dist / 1000).toFixed(1) + ' km'
       : poi.dist + ' m';
     return `
-      <a class="nearby-item" href="${mapsUrl}" target="_blank" rel="noopener" aria-label="${poi.name}, à ${dist}">
+      <button class="nearby-item" onclick="showRoute(${index})" aria-label="Itinéraire vers ${poi.name}, à ${dist}">
         <span class="nearby-icon">${iconAmenity(poi.amenity)}</span>
         <span class="nearby-body">
           <span class="nearby-name">${poi.name}</span>
           <span class="nearby-dist">${dist}</span>
         </span>
         <span class="nearby-arrow">›</span>
-      </a>`;
+      </button>`;
   }).join('');
 }
 

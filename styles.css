@@ -495,6 +495,48 @@ img { max-width: 100%; }
   .progress-fill { transition: none; }
 }
 
+/* ── Route panel ── */
+.route-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--c-surface);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+  border-left: 4px solid var(--c-primary);
+}
+.route-panel--loading {
+  gap: 10px;
+  font-size: .88rem;
+  color: var(--c-muted);
+}
+.route-panel--error {
+  border-color: var(--c-red);
+  font-size: .88rem;
+  color: var(--c-red-ink);
+}
+.route-panel__icon { font-size: 1.4rem; flex-shrink: 0; }
+.route-panel__body { display: flex; flex-direction: column; flex: 1; gap: 2px; }
+.route-panel__name { font-weight: 700; font-size: .92rem; }
+.route-panel__meta { font-size: .8rem; color: var(--c-muted); }
+.route-panel__maps {
+  color: var(--c-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 4px 6px;
+  flex-shrink: 0;
+}
+.route-panel__close {
+  color: var(--c-muted);
+  font-size: 1rem;
+  padding: 4px 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition: background .15s;
+}
+.route-panel__close:hover { background: var(--c-border); }
+
 /* ── Nearby list ── */
 .nearby-item {
   display: flex;
