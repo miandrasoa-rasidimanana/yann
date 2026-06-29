@@ -7,6 +7,8 @@ const state = {
   hist: [],
   checks: {},
   geo: { status: 'idle', lat: null, lon: null, acc: null, addr: null },
+  nearby: [],          // POI pour l'écran Aide
+  nearbyStatus: 'idle' // idle | loading | ok | error
 };
 
 const QUESTIONS = [
@@ -23,7 +25,8 @@ function go(screen) {
   state.hist.push(state.screen);
   state.screen = screen;
   render();
-  if (screen === 'urgence') locateUser();
+  if (screen === 'urgence') locateUser('urgence');
+  if (screen === 'aide')    locateUser('aide');
 }
 
 function back() {
@@ -43,7 +46,7 @@ function answerYes() {
   state.hist.push(state.screen);
   state.screen = 'urgence';
   render();
-  locateUser();
+  locateUser('urgence');
 }
 
 function answerNo() {
@@ -51,6 +54,7 @@ function answerNo() {
     state.hist.push(state.screen);
     state.screen = 'aide';
     render();
+    locateUser('aide');
   } else {
     state.step++;
     renderEval();
@@ -71,25 +75,30 @@ function toggle(id) {
   el.querySelector('.check-box').textContent = state.checks[id] ? '✓' : '';
 }
 
-/* ── Geolocation ── */
-let leafletMap = null;
-let leafletMarker = null;
+/* ══════════════════════════════════════════════
+   GÉOLOCALISATION
+══════════════════════════════════════════════ */
+let maps = { urgence: null, aide: null };
 
-function locateUser() {
+function locateUser(target) {
+  target = target || 'urgence';
   if (!('geolocation' in navigator)) {
     state.geo.status = 'error';
-    renderGeo();
+    renderGeoFor(target);
     return;
   }
   state.geo.status = 'loading';
-  renderGeo();
+  renderGeoFor(target);
+
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       state.geo.lat = pos.coords.latitude;
       state.geo.lon = pos.coords.longitude;
       state.geo.acc = Math.round(pos.coords.accuracy);
       state.geo.status = 'ok';
-      renderGeo();
+      renderGeoFor(target);
+
+      // Reverse geocoding (Nominatim)
       try {
         const r = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${state.geo.lat}&lon=${state.geo.lon}&zoom=18`,
@@ -97,19 +106,123 @@ function locateUser() {
         );
         const d = await r.json();
         state.geo.addr = d.display_name || null;
-        renderGeo();
+        renderGeoFor(target);
       } catch (_) {}
+
+      // Chercher les POI uniquement en mode Aide
+      if (target === 'aide') fetchNearby(state.geo.lat, state.geo.lon);
     },
     () => {
       state.geo.status = 'error';
-      renderGeo();
+      renderGeoFor(target);
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
   );
 }
 
-function renderGeo() {
-  const wrap = document.getElementById('geo-wrap');
+/* ── Overpass API : fontaines, restaurants, cafés ── */
+async function fetchNearby(lat, lon) {
+  state.nearbyStatus = 'loading';
+  renderNearby();
+
+  const radius = 800; // mètres
+  const query = `
+    [out:json][timeout:15];
+    (
+      node["amenity"="drinking_water"](around:${radius},${lat},${lon});
+      node["amenity"="restaurant"](around:${radius},${lat},${lon});
+      node["amenity"="cafe"](around:${radius},${lat},${lon});
+      node["amenity"="fast_food"](around:${radius},${lat},${lon});
+      node["amenity"="bar"](around:${radius},${lat},${lon});
+    );
+    out body;
+  `;
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query),
+    });
+    const json = await res.json();
+    const elements = json.elements || [];
+
+    // Calcul de distance + enrichissement
+    state.nearby = elements
+      .map(el => ({
+        id: el.id,
+        lat: el.lat,
+        lon: el.lon,
+        name: el.tags?.name || labelAmenity(el.tags?.amenity),
+        amenity: el.tags?.amenity,
+        dist: haversine(lat, lon, el.lat, el.lon),
+      }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 8); // garder 8 pour les marqueurs, afficher 3 en liste
+
+    state.nearbyStatus = 'ok';
+  } catch (_) {
+    state.nearbyStatus = 'error';
+  }
+  renderNearby();
+  // Ajouter les marqueurs POI sur la carte Aide si elle est déjà prête
+  addPoiMarkers();
+}
+
+function labelAmenity(type) {
+  const labels = {
+    drinking_water: 'Fontaine d\'eau',
+    restaurant: 'Restaurant',
+    cafe: 'Café',
+    fast_food: 'Restauration rapide',
+    bar: 'Bar',
+  };
+  return labels[type] || 'Point d\'intérêt';
+}
+
+function iconAmenity(type) {
+  const icons = {
+    drinking_water: '💧',
+    restaurant: '🍽️',
+    cafe: '☕',
+    fast_food: '🥙',
+    bar: '🍹',
+  };
+  return icons[type] || '📍';
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
+/* ── Marqueurs POI sur la carte Aide ── */
+function addPoiMarkers() {
+  const map = maps.aide;
+  if (!map || !state.nearby.length) return;
+
+  state.nearby.forEach(poi => {
+    const color = poi.amenity === 'drinking_water' ? '#0F8A5B' : '#7742FE';
+    const icon = L.divIcon({
+      className: 'poi-pin',
+      html: `<span class="poi-pin__dot" style="background:${color}">${iconAmenity(poi.amenity)}</span>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+    L.marker([poi.lat, poi.lon], { icon })
+      .addTo(map)
+      .bindPopup(`<strong>${poi.name}</strong><br>${poi.dist} m`);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDU CARTE
+══════════════════════════════════════════════ */
+function renderGeoFor(target) {
+  const wrapId = target === 'aide' ? 'geo-wrap-aide' : 'geo-wrap';
+  const wrap = document.getElementById(wrapId);
   if (!wrap) return;
 
   if (state.geo.status === 'loading') {
@@ -117,49 +230,100 @@ function renderGeo() {
     return;
   }
   if (state.geo.status === 'error') {
+    const btnFn = `locateUser('${target}')`;
     wrap.innerHTML = `<div class="geo-state">
-      <p>Position indisponible. Donnez votre adresse et des repères aux secours.</p>
-      <button class="btn btn--primary btn--sm" onclick="locateUser()">Réessayer</button>
+      <p>Position indisponible. ${target === 'urgence' ? 'Donnez votre adresse et des repères aux secours.' : 'Activez la localisation pour afficher les points à proximité.'}</p>
+      <button class="btn btn--${target === 'aide' ? 'green' : 'primary'} btn--sm" onclick="${btnFn}">Réessayer</button>
     </div>`;
     return;
   }
   if (state.geo.status === 'ok' && state.geo.lat) {
+    const mapElId = `leaflet-map-${target}`;
     const mapsUrl = `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lon}`;
     wrap.innerHTML = `
-      <div class="geo-card__map" id="leaflet-map"></div>
+      <div class="geo-card__map" id="${mapElId}"></div>
       <div class="geo-card__info">
         ${state.geo.addr ? `<p class="geo-card__addr">${state.geo.addr}</p>` : ''}
         <p class="geo-card__coords">${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)}${state.geo.acc ? ` · ± ${state.geo.acc} m` : ''}</p>
         <div class="geo-card__btns">
           <a class="btn btn--ghost btn--sm" href="${mapsUrl}" target="_blank" rel="noopener">Ouvrir dans Maps</a>
-          <button class="btn btn--ghost btn--sm" onclick="locateUser()">Actualiser</button>
+          <button class="btn btn--ghost btn--sm" onclick="locateUser('${target}')">Actualiser</button>
         </div>
       </div>`;
-    initLeaflet();
+    initLeafletFor(target);
     return;
   }
+  const btnColor = target === 'aide' ? 'green' : 'primary';
+  const btnLabel = target === 'aide' ? 'Voir les points à proximité' : 'Localiser';
   wrap.innerHTML = `<div class="geo-state">
-    <p>Activez la localisation pour transmettre votre position aux secours.</p>
-    <button class="btn btn--primary btn--sm" onclick="locateUser()">Localiser</button>
+    <p>${target === 'aide' ? 'Trouvez de l\'eau et des lieux frais à proximité.' : 'Activez la localisation pour transmettre votre position aux secours.'}</p>
+    <button class="btn btn--${btnColor} btn--sm" onclick="locateUser('${target}')">${btnLabel}</button>
   </div>`;
 }
 
-function initLeaflet() {
+function initLeafletFor(target) {
   if (typeof L === 'undefined') return;
-  const el = document.getElementById('leaflet-map');
+  const mapElId = `leaflet-map-${target}`;
+  const el = document.getElementById(mapElId);
   if (!el) return;
-  if (leafletMap) { leafletMap.remove(); leafletMap = null; }
-  leafletMap = L.map(el, { zoomControl: true }).setView([state.geo.lat, state.geo.lon], 16);
+
+  if (maps[target]) { maps[target].remove(); maps[target] = null; }
+
+  maps[target] = L.map(el, { zoomControl: true }).setView([state.geo.lat, state.geo.lon], 15);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '© OpenStreetMap'
-  }).addTo(leafletMap);
-  const icon = L.divIcon({
+  }).addTo(maps[target]);
+
+  // Marqueur position actuelle
+  const meIcon = L.divIcon({
     className: 'geo-pin',
     html: '<span class="geo-pin__dot"></span>',
     iconSize: [18, 18], iconAnchor: [9, 9],
   });
-  leafletMarker = L.marker([state.geo.lat, state.geo.lon], { icon }).addTo(leafletMap);
-  setTimeout(() => leafletMap && leafletMap.invalidateSize(), 80);
+  L.marker([state.geo.lat, state.geo.lon], { icon: meIcon })
+    .addTo(maps[target])
+    .bindPopup('Vous êtes ici');
+
+  setTimeout(() => maps[target] && maps[target].invalidateSize(), 80);
+
+  // Si les POI sont déjà chargés, les ajouter tout de suite
+  if (target === 'aide' && state.nearby.length) addPoiMarkers();
+}
+
+/* ── Liste des POI (3 premiers) ── */
+function renderNearby() {
+  const el = document.getElementById('nearby-list');
+  if (!el) return;
+
+  if (state.nearbyStatus === 'loading') {
+    el.innerHTML = `<div class="nearby-loading"><span class="spinner spinner--sm"></span><span>Recherche des points à proximité…</span></div>`;
+    return;
+  }
+  if (state.nearbyStatus === 'error') {
+    el.innerHTML = `<p class="nearby-empty">Impossible de récupérer les points à proximité. Vérifiez votre connexion.</p>`;
+    return;
+  }
+  if (!state.nearby.length) {
+    el.innerHTML = `<p class="nearby-empty">Aucun point trouvé dans un rayon de 800 m.</p>`;
+    return;
+  }
+
+  const top3 = state.nearby.slice(0, 3);
+  el.innerHTML = top3.map(poi => {
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lon}`;
+    const dist = poi.dist >= 1000
+      ? (poi.dist / 1000).toFixed(1) + ' km'
+      : poi.dist + ' m';
+    return `
+      <a class="nearby-item" href="${mapsUrl}" target="_blank" rel="noopener" aria-label="${poi.name}, à ${dist}">
+        <span class="nearby-icon">${iconAmenity(poi.amenity)}</span>
+        <span class="nearby-body">
+          <span class="nearby-name">${poi.name}</span>
+          <span class="nearby-dist">${dist}</span>
+        </span>
+        <span class="nearby-arrow">›</span>
+      </a>`;
+  }).join('');
 }
 
 /* ── Share ── */
@@ -191,15 +355,15 @@ function render() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen-' + state.screen);
   if (el) el.classList.add('active');
-  if (state.screen === 'eval') renderEval();
-  if (state.screen === 'urgence') renderGeo();
+  if (state.screen === 'eval')    renderEval();
+  if (state.screen === 'urgence') renderGeoFor('urgence');
+  if (state.screen === 'aide')    { renderGeoFor('aide'); renderNearby(); }
   window.scrollTo(0, 0);
 }
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
   render();
-  // Register SW
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }

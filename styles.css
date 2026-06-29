@@ -495,6 +495,47 @@ img { max-width: 100%; }
   .progress-fill { transition: none; }
 }
 
+/* ── Nearby list ── */
+.nearby-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--c-surface);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  color: var(--c-ink);
+  transition: opacity .15s;
+}
+.nearby-item:active { opacity: .7; }
+.nearby-icon { font-size: 1.4rem; flex-shrink: 0; }
+.nearby-body { display: flex; flex-direction: column; flex: 1; gap: 1px; }
+.nearby-name { font-weight: 600; font-size: .92rem; }
+.nearby-dist { font-size: .78rem; color: var(--c-muted); }
+.nearby-arrow { color: var(--c-primary); font-size: 1.3rem; font-weight: 700; }
+.nearby-loading {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 4px;
+  font-size: .88rem; color: var(--c-muted);
+}
+.nearby-empty { font-size: .88rem; color: var(--c-muted); padding: 8px 4px; }
+#nearby-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Spinner small ── */
+.spinner--sm { width: 20px; height: 20px; border-width: 2px; }
+
+/* ── POI pin ── */
+.poi-pin { background: none !important; border: none !important; }
+.poi-pin__dot {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: .9rem;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
 /* ── Leaflet tweaks ── */
 .leaflet-container { font-family: var(--font-body); }
 .geo-pin { background: none !important; border: none !important; }
