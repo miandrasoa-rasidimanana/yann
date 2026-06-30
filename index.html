@@ -21,29 +21,30 @@
        ACCUEIL
   ══════════════════════════════════════════ -->
   <div id="screen-home" class="screen active">
-    <div class="screen-body screen-body--home">
 
-      <div class="hero">
-        <div class="hero__logo">
-          <img src="Yann_hipo_logo.svg" alt="Logo YANN" width="200">
-        </div>
-        <p class="hero__tagline">N'hésitez pas à agir,<br>YANN est là pour vous guider.</p>
-        <p class="hero__sub">Vous êtes témoin d'un malaise ou d'un coup de chaleur&nbsp;? On vous guide, pas à pas.</p>
-      </div>
+    <!-- Logo — prend toute la moitié haute de l'écran -->
+    <div class="home-logo-wrap">
+      <img src="Yann_hipo_logo.svg" alt="Mascotte YANN" class="home-logo">
+    </div>
 
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn--cta" onclick="startEval()">🚨 Démarrer une alerte</button>
+    <!-- Contenu bas -->
+    <div class="home-content">
+      <h1 class="home-title">L'app qui vous aide à agir face à un malaise</h1>
+
+      <div class="home-actions">
+        <button class="btn btn--primary" onclick="startEval()">J'interviens</button>
 
         <div class="safety-hint">
           <span class="safety-hint__icon">🛡️</span>
           <p class="safety-hint__text">Avant d'agir, assurez-vous que vous et la personne êtes à l'abri de tout danger immédiat.</p>
         </div>
 
-        <button class="btn btn--ghost" onclick="go('info')">Informations &amp; numéros utiles</button>
+        <button class="btn btn--ghost" onclick="go('info')">S'informer</button>
       </div>
 
-      <p class="foot-note">Sans compte, sans connexion.<br><strong>En cas de danger immédiat, appelez le 112.</strong></p>
+      <p class="foot-note">Sans compte, sans connexion.<br><strong>En cas de détresse vital, composez le 112.</strong></p>
     </div>
+
   </div>
 
   <!-- ══════════════════════════════════════════

@@ -4,11 +4,11 @@
 /* ── Tokens ── */
 :root {
   --c-primary:    #415FF5;
-  --c-primary-lt: #E6EBFF;
-  --c-bg:         #F5EFFD;
+  --c-primary-lt: #E6EAFF;
+  --c-bg:         #F9F8F0;
   --c-ink:        #19002C;
-  --c-muted:      #6B7280;
-  --c-border:     #DDE3FF;
+  --c-muted:      #7A7A8C;
+  --c-border:     #E4E4EE;
   --c-surface:    #FFFFFF;
 
   --c-red:        #DC4A2A;
@@ -17,15 +17,11 @@
   --c-green:      #0F8A5B;
   --c-green-lt:   #E3F3EC;
 
-  /* CTA accueil — orange chaud, contraste fort sur fond lavande */
-  --c-cta:        #FF6B2B;
-  --c-cta-shadow: rgba(255,107,43,.55);
-
-  --r-btn:   18px;
+  --r-btn:   50px;
   --r-card:  18px;
   --r-sm:    14px;
   --shadow-card: 0 10px 24px -20px rgba(20,30,55,.4);
-  --shadow-btn:  0 14px 26px -14px rgba(65,95,245,.6);
+  --shadow-btn:  0 14px 26px -14px rgba(65,95,245,.5);
 
   --font-title: 'DynaPuff', system-ui, sans-serif;
   --font-body:  'Poppins', system-ui, sans-serif;
@@ -104,43 +100,38 @@ img { max-width: 100%; }
   gap: 12px;
   flex: 1;
 }
-.screen-body--home {
-  padding: 24px 22px 30px;
+/* ── Home screen layout ── */
+.home-logo-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 20px;
+  padding: 24px 16px 0;
+  min-height: 0;
 }
-
-/* ── Logo / Hero ── */
-.hero {
+.home-logo {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  object-fit: contain;
+}
+.home-content {
+  padding: 16px 24px 32px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  text-align: center;
+  gap: 20px;
 }
-.hero__logo svg { width: 100px; height: auto; }
-.hero__name {
+.home-title {
   font-family: var(--font-title);
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: 700;
-  color: var(--c-primary);
-  line-height: 1;
-}
-.hero__tagline {
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 1.05rem;
   color: var(--c-ink);
-  text-align: center;
-  line-height: 1.45;
-  max-width: 280px;
+  line-height: 1.2;
 }
-.hero__sub {
-  font-size: .9rem;
-  color: var(--c-muted);
-  max-width: 300px;
-  line-height: 1.5;
-  text-align: center;
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* ── Buttons ── */
@@ -165,14 +156,6 @@ img { max-width: 100%; }
   background: var(--c-primary);
   color: #fff;
   box-shadow: var(--shadow-btn);
-}
-.btn--cta {
-  background: var(--c-cta);
-  color: #fff;
-  box-shadow: 0 14px 26px -14px var(--c-cta-shadow);
-  font-size: 1.1rem;
-  min-height: 68px;
-  letter-spacing: .01em;
 }
 .btn--ghost {
   background: transparent;
