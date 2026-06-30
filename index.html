@@ -118,26 +118,74 @@
        AIDE
   ══════════════════════════════════════════ -->
   <div id="screen-aide" class="screen">
+    <div class="topbar">
+      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
+      <h1 class="topbar__title">Aide</h1>
+      <span class="topbar__spacer"></span>
+    </div>
+    <div class="screen-body">
 
-    <!-- Zone carte (70 % hauteur) -->
-    <div class="aide-map-zone">
-      <button class="eval-back aide-back-btn" onclick="back()" aria-label="Retour">←</button>
-      <div id="geo-wrap-aide" class="aide-map-inner">
-        <div class="aide-geo-idle">
-          <p>Trouvez de l'eau et des lieux frais à proximité.</p>
-          <button class="btn btn--green btn--sm" onclick="locateUser('aide')">Voir les points à proximité</button>
+      <div class="banner banner--aide">
+        <div class="banner__title">Aidez la personne à récupérer</div>
+        <div class="banner__sub">Aucun signe critique repéré. Restez près d'elle et vigilant.</div>
+      </div>
+
+      <div class="reflex-grid">
+        <div class="reflex-card">
+          <div class="reflex-badge">1</div>
+          <div class="reflex-title">Eau</div>
+          <div class="reflex-sub">De l'eau fraîche, à petites gorgées.</div>
+        </div>
+        <div class="reflex-card">
+          <div class="reflex-badge">2</div>
+          <div class="reflex-title">Ombre</div>
+          <div class="reflex-sub">À l'abri du soleil et de la chaleur.</div>
+        </div>
+        <div class="reflex-card">
+          <div class="reflex-badge">3</div>
+          <div class="reflex-title">Fraîcheur</div>
+          <div class="reflex-sub">Rafraîchir nuque, visage et bras.</div>
+        </div>
+        <div class="reflex-card">
+          <div class="reflex-badge">4</div>
+          <div class="reflex-title">Aide humaine</div>
+          <div class="reflex-sub">Rester avec elle, appeler du monde.</div>
         </div>
       </div>
-    </div>
 
-    <!-- Panneau bas (30 %) -->
-    <div class="aide-panel">
-      <div class="aide-panel-handle"></div>
-      <div id="route-panel">
-        <p class="aide-panel-hint">Appuyez sur un point de la carte pour voir l'itinéraire</p>
+      <div class="section">
+        <h3 class="section__title">Gestes à faire</h3>
+        <div class="card">
+          <ul class="checklist">
+            <li><button class="check-item" data-check="aide-1" onclick="toggle('aide-1')"><span class="check-box"></span><span class="check-label">Installez-la assise ou allongée au calme</span></button></li>
+            <li><button class="check-item" data-check="aide-2" onclick="toggle('aide-2')"><span class="check-box"></span><span class="check-label">Desserrez ses vêtements</span></button></li>
+            <li><button class="check-item" data-check="aide-3" onclick="toggle('aide-3')"><span class="check-box"></span><span class="check-label">Faites-la boire par petites gorgées si elle est consciente</span></button></li>
+            <li><button class="check-item" data-check="aide-4" onclick="toggle('aide-4')"><span class="check-box"></span><span class="check-label">Surveillez son état pendant quelques minutes</span></button></li>
+          </ul>
+        </div>
       </div>
-    </div>
 
+      <div class="section">
+        <h3 class="section__title">Points à proximité</h3>
+        <div class="geo-card" id="geo-wrap-aide">
+          <div class="geo-state">
+            <p>Trouvez de l'eau et des lieux frais à proximité.</p>
+            <button class="btn btn--green btn--sm" onclick="locateUser('aide')">Voir les points à proximité</button>
+          </div>
+        </div>
+        <div id="route-panel"></div>
+        <div id="nearby-list"></div>
+      </div>
+
+      <div class="section">
+        <h3 class="section__title">Relais &amp; accompagnement</h3>
+        <div class="msg-card">Prévenez un proche si possible, ou orientez la personne vers une association, une téléassistance ou un professionnel de santé. Restez avec elle jusqu'au relais.</div>
+      </div>
+
+      <button class="btn btn--green" onclick="go('alert')">Alerter les personnes autour</button>
+      <button class="btn btn--ghost-red" onclick="go('urgence')">L'état s'aggrave ? Appeler les secours</button>
+
+    </div>
   </div>
 
   <!-- ══════════════════════════════════════════

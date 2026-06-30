@@ -416,8 +416,18 @@ function renderGeoFor(target) {
     return;
   }
   if (state.geo.status === 'ok' && state.geo.lat) {
-    wrap.innerHTML = '<div id="leaflet-map-aide" style="width:100%;height:100%"></div>';
-    requestAnimationFrame(() => setTimeout(() => initLeafletFor('aide'), 50));
+    const mapsUrl = 'https://www.google.com/maps?q=' + state.geo.lat + ',' + state.geo.lon;
+    wrap.innerHTML = `
+      <div class="geo-card__map" id="leaflet-map-aide"></div>
+      <div class="geo-card__info">
+        ${state.geo.addr ? '<p class="geo-card__addr">' + state.geo.addr + '</p>' : ''}
+        <p class="geo-card__coords">${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)}${state.geo.acc ? ' · ± ' + state.geo.acc + ' m' : ''}</p>
+        <div class="geo-card__btns">
+          <a class="btn btn--ghost btn--sm" href="${mapsUrl}" target="_blank" rel="noopener">Ouvrir dans Maps</a>
+          <button class="btn btn--ghost btn--sm" onclick="locateUser('aide')">Actualiser</button>
+        </div>
+      </div>`;
+    initLeafletFor('aide');
     return;
   }
   wrap.innerHTML = `<div class="geo-state">
@@ -450,7 +460,7 @@ function initLeafletFor(target) {
   // Garder la référence du marqueur "moi" pour le mettre à jour avec watchPosition
   if (target === 'aide') meMarker = marker;
 
-  setTimeout(() => maps[target] && maps[target].invalidateSize(), 400);
+  setTimeout(() => maps[target] && maps[target].invalidateSize(), 80);
   if (target === 'aide' && state.nearby.length) addPoiMarkers();
 }
 
@@ -524,13 +534,7 @@ function render() {
   if (el) el.classList.add('active');
   if (state.screen === 'eval')    renderEval();
   if (state.screen === 'urgence') renderGeoFor('urgence');
-  if (state.screen === 'aide') {
-    renderGeoFor('aide');
-    const rp = document.getElementById('route-panel');
-    if (rp && !rp.querySelector('.route-panel')) {
-      rp.innerHTML = '<p class="aide-panel-hint">Appuyez sur un point de la carte pour voir l\'itinéraire</p>';
-    }
-  }
+  if (state.screen === 'aide')    { renderGeoFor('aide'); renderNearby(); }
   window.scrollTo(0, 0);
 }
 
