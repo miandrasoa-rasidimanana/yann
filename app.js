@@ -25,7 +25,7 @@ const QUESTION_ICONS = [
   'icones/2.svg',
   'icones/3.svg',
   'icones/4.svg',
-  null,
+  'icones/5.svg',
 ];
 
 /* ── Navigation ── */
