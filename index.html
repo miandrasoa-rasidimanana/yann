@@ -31,7 +31,7 @@
 
       <div class="home-actions">
         <button class="btn btn--primary" onclick="startEval()">J'interviens</button>
-        <button class="btn btn--ghost" onclick="go('info')">S'informer</button>
+        <button class="btn btn--ghost" onclick="go('comment-agir')">S'informer</button>
       </div>
 
       <p class="foot-note">Sans compte, sans connexion.<br><strong>En cas de détresse vital, composez le 112.</strong></p>
@@ -136,6 +136,19 @@
         <div id="route-panel"></div>
       </div>
 
+      <div class="section">
+        <h3 class="section__title">Reconnaître un coup de chaleur</h3>
+        <div class="card">
+          <ul class="dot-list">
+            <li>Température corporelle très élevée</li>
+            <li>Peau rouge et chaude, parfois sèche</li>
+            <li>Maux de tête, vertiges, nausées</li>
+            <li>Confusion, somnolence, perte de connaissance</li>
+            <li>Respiration et pouls rapides</li>
+          </ul>
+        </div>
+      </div>
+
       <!-- Handle "Comment agir ?" -->
       <button class="agir-handle" onclick="go('comment-agir')">
         <span class="agir-handle__dash"></span>
@@ -186,52 +199,6 @@
   </div>
 
   <!-- ══════════════════════════════════════════
-       INFORMATIONS
-  ══════════════════════════════════════════ -->
-  <div id="screen-info" class="screen">
-    <div class="topbar">
-      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
-      <h1 class="topbar__title">Informations</h1>
-      <span class="topbar__spacer"></span>
-    </div>
-    <div class="screen-body">
-
-      <div class="section">
-        <h3 class="section__title">Numéros d'urgence</h3>
-        <div class="card">
-          <ul class="num-list">
-            <li><a class="num-row" href="tel:112" aria-label="Appeler le 112"><span class="num-row__n">112</span><span class="num-row__lbl">Urgences (Europe)</span></a></li>
-            <li><a class="num-row" href="tel:15"  aria-label="Appeler le 15"><span class="num-row__n">15</span><span class="num-row__lbl">SAMU — urgence médicale</span></a></li>
-            <li><a class="num-row" href="tel:18"  aria-label="Appeler le 18"><span class="num-row__n">18</span><span class="num-row__lbl">Pompiers</span></a></li>
-            <li><a class="num-row" href="sms:114" aria-label="SMS au 114"><span class="num-row__n">114</span><span class="num-row__lbl">Sourds &amp; malentendants (SMS)</span></a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3 class="section__title">Reconnaître un coup de chaleur</h3>
-        <div class="card">
-          <ul class="dot-list">
-            <li>Température corporelle très élevée</li>
-            <li>Peau rouge et chaude, parfois sèche</li>
-            <li>Maux de tête, vertiges, nausées</li>
-            <li>Confusion, somnolence, perte de connaissance</li>
-            <li>Respiration et pouls rapides</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3 class="section__title">Gestes qui sauvent</h3>
-        <div class="msg-card">Mettre à l'ombre, allonger, desserrer les vêtements, rafraîchir, faire boire si la personne est consciente, surveiller — et appeler le 112 si l'état s'aggrave.</div>
-      </div>
-
-      <p class="disclaimer"><strong>YANN ne remplace pas un avis médical ni les secours.</strong><br>En cas de doute, appelez le 112.</p>
-
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
        COMMENT AGIR ?
   ══════════════════════════════════════════ -->
   <div id="screen-comment-agir" class="screen">
@@ -245,15 +212,6 @@
     <div class="screen-body agir-body">
 
       <h1 class="agir-title">Comment agir ?</h1>
-
-      <!-- Barre de recherche -->
-      <div class="agir-search">
-        <svg class="agir-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-          <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <input class="agir-search__input" type="search" placeholder="Massage cardiaque…" aria-label="Rechercher un geste">
-      </div>
 
       <!-- Filtres -->
       <div class="agir-filters" role="group" aria-label="Filtres">
@@ -306,17 +264,6 @@
 
       </div>
 
-      <!-- Numéros d'urgence -->
-      <h2 class="agir-section-title">Numéros d'urgence</h2>
-      <div class="card">
-        <ul class="num-list">
-          <li><a class="num-row" href="tel:112" aria-label="Appeler le 112"><span class="num-row__n">112</span><span class="num-row__lbl">Urgences (Europe)</span></a></li>
-          <li><a class="num-row" href="tel:15"  aria-label="Appeler le 15"><span class="num-row__n">15</span><span class="num-row__lbl">SAMU — urgence médicale</span></a></li>
-          <li><a class="num-row" href="tel:18"  aria-label="Appeler le 18"><span class="num-row__n">18</span><span class="num-row__lbl">Pompiers</span></a></li>
-          <li><a class="num-row" href="sms:114" aria-label="SMS au 114"><span class="num-row__n">114</span><span class="num-row__lbl">Sourds &amp; malentendants (SMS)</span></a></li>
-        </ul>
-      </div>
-
       <!-- Gestes à faire -->
       <h2 class="agir-section-title">Gestes à faire</h2>
       <div class="card">
@@ -327,6 +274,17 @@
           <li><button class="check-item" data-check="agir-4" onclick="toggle('agir-4')"><span class="check-box"></span><span class="check-label">Faites-la boire par petites gorgées si elle est consciente</span></button></li>
           <li><button class="check-item" data-check="agir-5" onclick="toggle('agir-5')"><span class="check-box"></span><span class="check-label">Surveillez son état et parlez-lui régulièrement</span></button></li>
           <li><button class="check-item" data-check="agir-6" onclick="toggle('agir-6')"><span class="check-box"></span><span class="check-label">Appelez le 112 si l'état s'aggrave ou ne s'améliore pas</span></button></li>
+        </ul>
+      </div>
+
+      <!-- Numéros d'urgence -->
+      <h2 class="agir-section-title">Numéros d'urgence</h2>
+      <div class="card">
+        <ul class="num-list">
+          <li><a class="num-row" href="tel:112" aria-label="Appeler le 112"><span class="num-row__n">112</span><span class="num-row__lbl">Urgences (Europe)</span></a></li>
+          <li><a class="num-row" href="tel:15"  aria-label="Appeler le 15"><span class="num-row__n">15</span><span class="num-row__lbl">SAMU — urgence médicale</span></a></li>
+          <li><a class="num-row" href="tel:18"  aria-label="Appeler le 18"><span class="num-row__n">18</span><span class="num-row__lbl">Pompiers</span></a></li>
+          <li><a class="num-row" href="sms:114" aria-label="SMS au 114"><span class="num-row__n">114</span><span class="num-row__lbl">Sourds &amp; malentendants (SMS)</span></a></li>
         </ul>
       </div>
 
