@@ -416,17 +416,7 @@ function renderGeoFor(target) {
     return;
   }
   if (state.geo.status === 'ok' && state.geo.lat) {
-    const mapsUrl = 'https://www.google.com/maps?q=' + state.geo.lat + ',' + state.geo.lon;
-    wrap.innerHTML = `
-      <div class="geo-card__map" id="leaflet-map-aide"></div>
-      <div class="geo-card__info">
-        ${state.geo.addr ? '<p class="geo-card__addr">' + state.geo.addr + '</p>' : ''}
-        <p class="geo-card__coords">${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)}${state.geo.acc ? ' · ± ' + state.geo.acc + ' m' : ''}</p>
-        <div class="geo-card__btns">
-          <a class="btn btn--ghost btn--sm" href="${mapsUrl}" target="_blank" rel="noopener">Ouvrir dans Maps</a>
-          <button class="btn btn--ghost btn--sm" onclick="locateUser('aide')">Actualiser</button>
-        </div>
-      </div>`;
+    wrap.innerHTML = '<div class="geo-card__map" id="leaflet-map-aide"></div>';
     initLeafletFor('aide');
     return;
   }
