@@ -22,23 +22,15 @@
   ══════════════════════════════════════════ -->
   <div id="screen-home" class="screen active">
 
-    <!-- Logo — prend toute la moitié haute de l'écran -->
     <div class="home-logo-wrap">
       <img src="Yann_hipo_logo.svg" alt="Mascotte YANN" class="home-logo">
     </div>
 
-    <!-- Contenu bas -->
     <div class="home-content">
       <h1 class="home-title">L'app qui vous aide à agir face à un malaise</h1>
 
       <div class="home-actions">
         <button class="btn btn--primary" onclick="startEval()">J'interviens</button>
-
-        <div class="safety-hint">
-          <span class="safety-hint__icon">🛡️</span>
-          <p class="safety-hint__text">Avant d'agir, assurez-vous que vous et la personne êtes à l'abri de tout danger immédiat.</p>
-        </div>
-
         <button class="btn btn--ghost" onclick="go('info')">S'informer</button>
       </div>
 
@@ -51,27 +43,31 @@
        ÉVALUATION
   ══════════════════════════════════════════ -->
   <div id="screen-eval" class="screen">
-    <div class="topbar">
-      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
-      <h1 class="topbar__title">Évaluation</h1>
-      <span class="topbar__spacer"></span>
+
+    <!-- Bouton retour standalone -->
+    <div class="eval-nav">
+      <button class="eval-back" onclick="back()" aria-label="Retour">←</button>
     </div>
-    <div class="screen-body">
-      <div class="progress-wrap">
-        <span class="progress-label" id="prog-label">Question 1 / 5</span>
-        <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:20%"></div></div>
-      </div>
 
-      <p id="question-text" class="question-text"></p>
-      <p class="question-hint">En cas de doute, répondez « Oui ».</p>
-
-      <div class="spacer"></div>
-
-      <div class="btn-row">
-        <button class="btn btn--red btn--yesno" onclick="answerYes()">Oui</button>
-        <button class="btn btn--ghost btn--yesno" onclick="answerNo()">Non</button>
-      </div>
+    <!-- Illustration de la question -->
+    <div class="eval-illustration">
+      <img id="question-img" src="icones/inconsciente.svg" alt="" class="eval-img">
     </div>
+
+    <!-- Contenu bas -->
+    <div class="eval-content">
+      <p id="question-text" class="eval-question"></p>
+      <p class="eval-hint">En cas de doute, répondez « Oui ».</p>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- Boutons -->
+    <div class="eval-buttons">
+      <button class="btn btn--primary btn--yesno" onclick="answerYes()">Oui</button>
+      <button class="btn btn--ghost btn--yesno" onclick="answerNo()">Non</button>
+    </div>
+
   </div>
 
   <!-- ══════════════════════════════════════════
@@ -86,12 +82,12 @@
     <div class="screen-body">
 
       <div class="banner banner--urgence">
-        <div class="banner__title">⚠️ Appelez les secours maintenant</div>
+        <div class="banner__title">Appelez les secours maintenant</div>
         <div class="banner__sub">Au moins un signe critique a été repéré.</div>
       </div>
 
       <a class="btn btn--red" href="tel:112" aria-label="Appeler le 112 — Urgences">
-        📞 Appeler le 112
+        Appeler le 112
       </a>
 
       <div class="num-grid">
@@ -110,7 +106,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">📍 Votre position à communiquer</h3>
+        <h3 class="section__title">Votre position à communiquer</h3>
         <div class="geo-card" id="geo-wrap">
           <div class="geo-state">
             <p>Activez la localisation pour transmettre votre position aux secours.</p>
@@ -120,7 +116,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">📢 Quoi dire au téléphone</h3>
+        <h3 class="section__title">Quoi dire au téléphone</h3>
         <div class="card">
           <ul class="checklist" id="list-say">
             <li><button class="check-item" data-check="say-1" onclick="toggle('say-1')"><span class="check-box"></span><span class="check-label">Où vous êtes : adresse précise et points de repère</span></button></li>
@@ -133,7 +129,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">🤲 Gestes en attendant les secours</h3>
+        <h3 class="section__title">Gestes en attendant les secours</h3>
         <div class="card">
           <ul class="checklist">
             <li><button class="check-item" data-check="wait-1" onclick="toggle('wait-1')"><span class="check-box"></span><span class="check-label">Allongez la personne à l'ombre, au frais</span></button></li>
@@ -145,7 +141,7 @@
         </div>
       </div>
 
-      <button class="btn btn--ghost" onclick="go('alert')">👥 Alerter les personnes autour</button>
+      <button class="btn btn--ghost" onclick="go('alert')">Alerter les personnes autour</button>
 
     </div>
   </div>
@@ -162,35 +158,35 @@
     <div class="screen-body">
 
       <div class="banner banner--aide">
-        <div class="banner__title">✅ Aidez la personne à récupérer</div>
+        <div class="banner__title">Aidez la personne à récupérer</div>
         <div class="banner__sub">Aucun signe critique repéré. Restez près d'elle et vigilant.</div>
       </div>
 
       <div class="reflex-grid">
         <div class="reflex-card">
           <div class="reflex-badge">1</div>
-          <div class="reflex-title">💧 Eau</div>
+          <div class="reflex-title">Eau</div>
           <div class="reflex-sub">De l'eau fraîche, à petites gorgées.</div>
         </div>
         <div class="reflex-card">
           <div class="reflex-badge">2</div>
-          <div class="reflex-title">🌳 Ombre</div>
+          <div class="reflex-title">Ombre</div>
           <div class="reflex-sub">À l'abri du soleil et de la chaleur.</div>
         </div>
         <div class="reflex-card">
           <div class="reflex-badge">3</div>
-          <div class="reflex-title">❄️ Fraîcheur</div>
+          <div class="reflex-title">Fraîcheur</div>
           <div class="reflex-sub">Rafraîchir nuque, visage et bras.</div>
         </div>
         <div class="reflex-card">
           <div class="reflex-badge">4</div>
-          <div class="reflex-title">🙋 Aide</div>
+          <div class="reflex-title">Aide humaine</div>
           <div class="reflex-sub">Rester avec elle, appeler du monde.</div>
         </div>
       </div>
 
       <div class="section">
-        <h3 class="section__title">🤲 Gestes à faire</h3>
+        <h3 class="section__title">Gestes à faire</h3>
         <div class="card">
           <ul class="checklist">
             <li><button class="check-item" data-check="aide-1" onclick="toggle('aide-1')"><span class="check-box"></span><span class="check-label">Installez-la assise ou allongée au calme</span></button></li>
@@ -202,7 +198,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">🗺️ Points à proximité</h3>
+        <h3 class="section__title">Points à proximité</h3>
         <div class="geo-card" id="geo-wrap-aide">
           <div class="geo-state">
             <p>Trouvez de l'eau et des lieux frais à proximité.</p>
@@ -214,12 +210,12 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">🔗 Relais &amp; accompagnement</h3>
+        <h3 class="section__title">Relais &amp; accompagnement</h3>
         <div class="msg-card">Prévenez un proche si possible, ou orientez la personne vers une association, une téléassistance ou un professionnel de santé. Restez avec elle jusqu'au relais.</div>
       </div>
 
-      <button class="btn btn--green" onclick="go('alert')">👥 Alerter les personnes autour</button>
-      <button class="btn btn--ghost-red" onclick="go('urgence')">⚠️ L'état s'aggrave ? Appeler les secours</button>
+      <button class="btn btn--green" onclick="go('alert')">Alerter les personnes autour</button>
+      <button class="btn btn--ghost-red" onclick="go('urgence')">L'état s'aggrave ? Appeler les secours</button>
 
     </div>
   </div>
@@ -236,11 +232,11 @@
     <div class="screen-body">
 
       <div class="banner banner--violet">
-        <div class="banner__title">👥 Mobilisez les personnes présentes</div>
+        <div class="banner__title">Mobilisez les personnes présentes</div>
         <div class="banner__sub">Vous n'êtes pas seul. Devenez les yeux et les mains de l'entraide autour de vous.</div>
       </div>
 
-      <button class="btn btn--primary" onclick="shareHelp()">📲 Partager la demande d'aide</button>
+      <button class="btn btn--primary" onclick="shareHelp()">Partager la demande d'aide</button>
 
       <div class="section">
         <h3 class="section__title">À faire autour de vous</h3>
@@ -255,7 +251,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">💬 Message à partager</h3>
+        <h3 class="section__title">Message à partager</h3>
         <div class="msg-card">Une personne a besoin d'aide ici. Pouvez-vous venir m'aider, apporter de l'eau, ou appeler les secours (112) ?</div>
       </div>
 
@@ -274,7 +270,7 @@
     <div class="screen-body">
 
       <div class="section">
-        <h3 class="section__title">📞 Numéros d'urgence</h3>
+        <h3 class="section__title">Numéros d'urgence</h3>
         <div class="card">
           <ul class="num-list">
             <li><a class="num-row" href="tel:112" aria-label="Appeler le 112"><span class="num-row__n">112</span><span class="num-row__lbl">Urgences (Europe)</span></a></li>
@@ -286,7 +282,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">🌡️ Reconnaître un coup de chaleur</h3>
+        <h3 class="section__title">Reconnaître un coup de chaleur</h3>
         <div class="card">
           <ul class="dot-list">
             <li>Température corporelle très élevée</li>
@@ -299,7 +295,7 @@
       </div>
 
       <div class="section">
-        <h3 class="section__title">🤲 Gestes qui sauvent</h3>
+        <h3 class="section__title">Gestes qui sauvent</h3>
         <div class="msg-card">Mettre à l'ombre, allonger, desserrer les vêtements, rafraîchir, faire boire si la personne est consciente, surveiller — et appeler le 112 si l'état s'aggrave.</div>
       </div>
 

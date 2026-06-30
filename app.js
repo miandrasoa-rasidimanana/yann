@@ -19,6 +19,15 @@ const QUESTIONS = [
   'Son état s\'aggrave-t-il rapidement ?',
 ];
 
+// Illustration associée à chaque question (null = pas d'image)
+const QUESTION_ICONS = [
+  'icones/inconsciente.svg',
+  'icones/2.svg',
+  'icones/3.svg',
+  'icones/4.svg',
+  null,
+];
+
 /* ── Navigation ── */
 function go(screen) {
   if (screen === state.screen) return;
@@ -466,13 +475,20 @@ function shareHelp() {
 
 /* ── Render ── */
 function renderEval() {
-  const pct = ((state.step + 1) / QUESTIONS.length * 100).toFixed(0);
-  const fill = document.getElementById('prog-fill');
-  const lbl  = document.getElementById('prog-label');
   const qtxt = document.getElementById('question-text');
-  if (fill) fill.style.width = pct + '%';
-  if (lbl)  lbl.textContent = `Question ${state.step + 1} / ${QUESTIONS.length}`;
+  const qimg = document.getElementById('question-img');
+
   if (qtxt) qtxt.textContent = QUESTIONS[state.step];
+
+  if (qimg) {
+    const icon = QUESTION_ICONS[state.step];
+    if (icon) {
+      qimg.src = icon;
+      qimg.classList.remove('eval-img--hidden');
+    } else {
+      qimg.classList.add('eval-img--hidden');
+    }
+  }
 }
 
 function render() {

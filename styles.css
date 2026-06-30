@@ -127,6 +127,7 @@ img { max-width: 100%; }
   font-weight: 700;
   color: var(--c-ink);
   line-height: 1.2;
+  text-align: center;
 }
 .home-actions {
   display: flex;
@@ -218,40 +219,64 @@ img { max-width: 100%; }
 }
 .foot-note strong { color: var(--c-ink); }
 
-/* ── Barre de progression ── */
-.progress-wrap { display: flex; flex-direction: column; gap: 6px; }
-.progress-label {
-  font-size: .8rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--c-muted);
+/* ── Écran évaluation ── */
+.eval-nav {
+  padding: 16px 20px 0;
 }
-.progress-track {
-  height: 6px;
-  border-radius: 99px;
-  background: var(--c-border);
-  overflow: hidden;
+.eval-back {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  color: var(--c-primary);
+  border-radius: 50%;
+  background: var(--c-primary-lt);
+  transition: opacity .15s;
 }
-.progress-fill {
-  height: 100%;
-  background: var(--c-primary);
-  border-radius: 99px;
-  transition: width .3s ease;
-}
+.eval-back:active { opacity: .7; }
 
-/* ── Question ── */
-.question-text {
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 1.5rem;
-  line-height: 1.3;
+.eval-illustration {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  min-height: 0;
+}
+.eval-img {
+  width: 100%;
+  max-width: 300px;
+  max-height: 260px;
+  object-fit: contain;
+}
+.eval-img--hidden { display: none; }
+
+.eval-content {
+  padding: 0 24px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.eval-question {
+  font-family: var(--font-title);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
   color: var(--c-ink);
 }
-.question-hint {
-  font-size: .9rem;
+.eval-hint {
+  font-size: .88rem;
   color: var(--c-muted);
-  font-style: italic;
+}
+
+.eval-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px 20px 32px;
+}
+.btn--yesno {
+  min-height: 60px;
+  font-size: 1.05rem;
 }
 
 /* ── Banner ── */
