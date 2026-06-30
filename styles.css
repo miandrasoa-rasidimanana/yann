@@ -619,6 +619,9 @@ img { max-width: 100%; }
   width: 100%;
   height: 180px;
 }
+#screen-aide .geo-card__map {
+  height: 450px;
+}
 .geo-card__info {
   padding: 12px 14px;
   display: flex;
