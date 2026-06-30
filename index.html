@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#7742FE">
+  <meta name="theme-color" content="#415FF5">
   <meta name="description" content="YANN — Vous êtes témoin d'un malaise ou d'un coup de chaleur ? On vous guide, pas à pas. Sans compte, sans connexion.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,15 +22,23 @@
   ══════════════════════════════════════════ -->
   <div id="screen-home" class="screen active">
     <div class="screen-body screen-body--home">
+
       <div class="hero">
         <div class="hero__logo">
-          <img src="Logo.png" alt="Logo YANN" width="160">
+          <img src="Yann_hipo_logo.svg" alt="Logo YANN" width="200">
         </div>
+        <p class="hero__tagline">N'hésitez pas à agir,<br>YANN est là pour vous guider.</p>
         <p class="hero__sub">Vous êtes témoin d'un malaise ou d'un coup de chaleur&nbsp;? On vous guide, pas à pas.</p>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn--primary" onclick="startEval()">🚨 Démarrer une alerte</button>
+        <button class="btn btn--cta" onclick="startEval()">🚨 Démarrer une alerte</button>
+
+        <div class="safety-hint">
+          <span class="safety-hint__icon">🛡️</span>
+          <p class="safety-hint__text">Avant d'agir, assurez-vous que vous et la personne êtes à l'abri de tout danger immédiat.</p>
+        </div>
+
         <button class="btn btn--ghost" onclick="go('info')">Informations &amp; numéros utiles</button>
       </div>
 
