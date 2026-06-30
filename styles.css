@@ -438,6 +438,10 @@ img { max-width: 100%; }
   font-weight: 700;
   color: var(--c-ink);
 }
+#screen-aide .section__title {
+  text-align: center;
+  font-size: 1.5rem;
+}
 
 /* ── Grille urgence 3 cols ── */
 .num-grid {
@@ -806,7 +810,7 @@ img { max-width: 100%; }
 }
 .agir-handle__label {
   font-family: var(--font-title);
-  font-size: 1.05rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--c-ink);
 }
