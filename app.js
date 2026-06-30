@@ -417,7 +417,7 @@ function renderGeoFor(target) {
   }
   if (state.geo.status === 'ok' && state.geo.lat) {
     wrap.innerHTML = '<div id="leaflet-map-aide" style="width:100%;height:100%"></div>';
-    initLeafletFor('aide');
+    requestAnimationFrame(() => setTimeout(() => initLeafletFor('aide'), 50));
     return;
   }
   wrap.innerHTML = `<div class="geo-state">
@@ -450,7 +450,7 @@ function initLeafletFor(target) {
   // Garder la référence du marqueur "moi" pour le mettre à jour avec watchPosition
   if (target === 'aide') meMarker = marker;
 
-  setTimeout(() => maps[target] && maps[target].invalidateSize(), 80);
+  setTimeout(() => maps[target] && maps[target].invalidateSize(), 400);
   if (target === 'aide' && state.nearby.length) addPoiMarkers();
 }
 
