@@ -90,7 +90,17 @@ img { max-width: 100%; }
   flex: 1;
   text-align: center;
 }
-.topbar__spacer { width: 40px; flex-shrink: 0; }
+.topbar__spacer { flex: 1; }
+.topbar__close {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-ink);
+  background: transparent;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.topbar__close:active { opacity: .7; }
 
 /* ── Body padding ── */
 .screen-body {
@@ -222,7 +232,20 @@ img { max-width: 100%; }
 /* ── Écran évaluation ── */
 .eval-nav {
   padding: 16px 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+.nav-close {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-ink);
+  background: transparent;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.nav-close:active { opacity: .7; }
 .eval-back {
   width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
@@ -283,6 +306,9 @@ img { max-width: 100%; }
 .urg-nav {
   padding: 16px 20px 0;
   flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .urg-body {
   padding: 20px 24px 32px;
