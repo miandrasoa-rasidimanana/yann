@@ -500,6 +500,16 @@ function shareHelp() {
   }
 }
 
+/* ── Filtres "Comment agir ?" ── */
+function filterAgir(btn, cat) {
+  document.querySelectorAll('.agir-chip').forEach(c => c.classList.remove('agir-chip--active'));
+  btn.classList.add('agir-chip--active');
+  document.querySelectorAll('.agir-card').forEach(card => {
+    const show = cat === 'tous' || card.dataset.cat === cat;
+    card.classList.toggle('agir-card--hidden', !show);
+  });
+}
+
 /* ── Render ── */
 function renderEval() {
   const qtxt = document.getElementById('question-text');
