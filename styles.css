@@ -815,6 +815,33 @@ img { max-width: 100%; }
   color: var(--c-ink);
 }
 
+/* ── Bouton flottant "Comment agir ?" dans Aide ── */
+#screen-aide .screen-body { padding-bottom: 90px; }
+.aide-agir-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--c-bg) 40%);
+  z-index: 20;
+}
+.aide-agir-btn {
+  width: 100%;
+  background: var(--c-primary);
+  color: #fff;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--shadow-btn);
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.aide-agir-btn:active { opacity: .85; }
+
 /* ── Écran "Comment agir ?" ── */
 .agir-body { padding-bottom: 90px; }
 
