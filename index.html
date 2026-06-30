@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
   <title>YANN</title>
@@ -74,74 +74,42 @@
        URGENCE
   ══════════════════════════════════════════ -->
   <div id="screen-urgence" class="screen">
-    <div class="topbar">
-      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
-      <h1 class="topbar__title">Urgence</h1>
-      <span class="topbar__spacer"></span>
+
+    <div class="urg-nav">
+      <button class="eval-back" onclick="back()" aria-label="Retour">←</button>
     </div>
-    <div class="screen-body">
 
-      <div class="banner banner--urgence">
-        <div class="banner__title">Appelez les secours maintenant</div>
-        <div class="banner__sub">Au moins un signe critique a été repéré.</div>
-      </div>
+    <div class="urg-body">
 
-      <a class="btn btn--red" href="tel:112" aria-label="Appeler le 112 — Urgences">
-        Appeler le 112
-      </a>
+      <h1 class="urg-title">Vous allez contacter le 112</h1>
 
-      <div class="num-grid">
-        <a class="num-card" href="tel:15" aria-label="Appeler le 15 — SAMU">
-          <span class="num-card__num">15</span>
-          <span class="num-card__label">SAMU</span>
-        </a>
-        <a class="num-card" href="tel:18" aria-label="Appeler le 18 — Pompiers">
-          <span class="num-card__num">18</span>
-          <span class="num-card__label">Pompiers</span>
-        </a>
-        <a class="num-card" href="sms:114" aria-label="SMS au 114 — Sourds">
-          <span class="num-card__num">114</span>
-          <span class="num-card__label">SMS</span>
-        </a>
-      </div>
-
-      <div class="section">
-        <h3 class="section__title">Votre position à communiquer</h3>
-        <div class="geo-card" id="geo-wrap">
-          <div class="geo-state">
-            <p>Activez la localisation pour transmettre votre position aux secours.</p>
-            <button class="btn btn--primary btn--sm" onclick="locateUser()">Localiser</button>
+      <!-- Carte adresse — remplie par renderGeoFor('urgence') -->
+      <div class="urg-addr-card">
+        <div id="geo-wrap">
+          <div class="urg-addr-inner urg-addr-loading">
+            <span class="spinner spinner--sm"></span>
+            <span>Localisation en cours…</span>
           </div>
         </div>
       </div>
 
-      <div class="section">
-        <h3 class="section__title">Quoi dire au téléphone</h3>
-        <div class="card">
-          <ul class="checklist" id="list-say">
-            <li><button class="check-item" data-check="say-1" onclick="toggle('say-1')"><span class="check-box"></span><span class="check-label">Où vous êtes : adresse précise et points de repère</span></button></li>
-            <li><button class="check-item" data-check="say-2" onclick="toggle('say-2')"><span class="check-box"></span><span class="check-label">Ce qui se passe et l'état de la personne</span></button></li>
-            <li><button class="check-item" data-check="say-3" onclick="toggle('say-3')"><span class="check-box"></span><span class="check-label">Si elle est consciente et si elle respire</span></button></li>
-            <li><button class="check-item" data-check="say-4" onclick="toggle('say-4')"><span class="check-box"></span><span class="check-label">Son âge approximatif</span></button></li>
-            <li><button class="check-item" data-check="say-5" onclick="toggle('say-5')"><span class="check-box"></span><span class="check-label">Ne raccrochez pas avant qu'on vous le demande</span></button></li>
-          </ul>
-        </div>
+      <!-- Bouton appel principal -->
+      <div class="urg-call-wrap">
+        <a class="urg-call-btn" href="tel:112" aria-label="Appeler le 112">
+          <svg class="urg-call-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.18 21 3 13.82 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.58.11.35.03.74-.24 1.02L6.6 10.8z" fill="white"/>
+          </svg>
+          <span class="urg-call-label">URGENCE</span>
+        </a>
       </div>
 
-      <div class="section">
-        <h3 class="section__title">Gestes en attendant les secours</h3>
-        <div class="card">
-          <ul class="checklist">
-            <li><button class="check-item" data-check="wait-1" onclick="toggle('wait-1')"><span class="check-box"></span><span class="check-label">Allongez la personne à l'ombre, au frais</span></button></li>
-            <li><button class="check-item" data-check="wait-2" onclick="toggle('wait-2')"><span class="check-box"></span><span class="check-label">Desserrez ses vêtements</span></button></li>
-            <li><button class="check-item" data-check="wait-3" onclick="toggle('wait-3')"><span class="check-box"></span><span class="check-label">Rafraîchissez-la : eau, linge humide, éventez</span></button></li>
-            <li><button class="check-item" data-check="wait-4" onclick="toggle('wait-4')"><span class="check-box"></span><span class="check-label">Parlez-lui et surveillez sa respiration</span></button></li>
-            <li><button class="check-item" data-check="wait-5" onclick="toggle('wait-5')"><span class="check-box"></span><span class="check-label">Inconsciente mais respire : position latérale de sécurité</span></button></li>
-          </ul>
-        </div>
-      </div>
-
-      <button class="btn btn--ghost" onclick="go('alert')">Alerter les personnes autour</button>
+      <!-- SMS 114 -->
+      <a class="btn btn--primary urg-sms-btn" href="sms:114" aria-label="Envoyer un SMS au 114">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="white"/>
+        </svg>
+        Message au 114
+      </a>
 
     </div>
   </div>
@@ -150,74 +118,26 @@
        AIDE
   ══════════════════════════════════════════ -->
   <div id="screen-aide" class="screen">
-    <div class="topbar">
-      <button class="topbar__back" onclick="back()" aria-label="Retour">‹</button>
-      <h1 class="topbar__title">Aide</h1>
-      <span class="topbar__spacer"></span>
+
+    <!-- Zone carte (70 % hauteur) -->
+    <div class="aide-map-zone">
+      <button class="eval-back aide-back-btn" onclick="back()" aria-label="Retour">←</button>
+      <div id="geo-wrap-aide" class="aide-map-inner">
+        <div class="aide-geo-idle">
+          <p>Trouvez de l'eau et des lieux frais à proximité.</p>
+          <button class="btn btn--green btn--sm" onclick="locateUser('aide')">Voir les points à proximité</button>
+        </div>
+      </div>
     </div>
-    <div class="screen-body">
 
-      <div class="banner banner--aide">
-        <div class="banner__title">Aidez la personne à récupérer</div>
-        <div class="banner__sub">Aucun signe critique repéré. Restez près d'elle et vigilant.</div>
+    <!-- Panneau bas (30 %) -->
+    <div class="aide-panel">
+      <div class="aide-panel-handle"></div>
+      <div id="route-panel">
+        <p class="aide-panel-hint">Appuyez sur un point de la carte pour voir l'itinéraire</p>
       </div>
-
-      <div class="reflex-grid">
-        <div class="reflex-card">
-          <div class="reflex-badge">1</div>
-          <div class="reflex-title">Eau</div>
-          <div class="reflex-sub">De l'eau fraîche, à petites gorgées.</div>
-        </div>
-        <div class="reflex-card">
-          <div class="reflex-badge">2</div>
-          <div class="reflex-title">Ombre</div>
-          <div class="reflex-sub">À l'abri du soleil et de la chaleur.</div>
-        </div>
-        <div class="reflex-card">
-          <div class="reflex-badge">3</div>
-          <div class="reflex-title">Fraîcheur</div>
-          <div class="reflex-sub">Rafraîchir nuque, visage et bras.</div>
-        </div>
-        <div class="reflex-card">
-          <div class="reflex-badge">4</div>
-          <div class="reflex-title">Aide humaine</div>
-          <div class="reflex-sub">Rester avec elle, appeler du monde.</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3 class="section__title">Gestes à faire</h3>
-        <div class="card">
-          <ul class="checklist">
-            <li><button class="check-item" data-check="aide-1" onclick="toggle('aide-1')"><span class="check-box"></span><span class="check-label">Installez-la assise ou allongée au calme</span></button></li>
-            <li><button class="check-item" data-check="aide-2" onclick="toggle('aide-2')"><span class="check-box"></span><span class="check-label">Desserrez ses vêtements</span></button></li>
-            <li><button class="check-item" data-check="aide-3" onclick="toggle('aide-3')"><span class="check-box"></span><span class="check-label">Faites-la boire par petites gorgées si elle est consciente</span></button></li>
-            <li><button class="check-item" data-check="aide-4" onclick="toggle('aide-4')"><span class="check-box"></span><span class="check-label">Surveillez son état pendant quelques minutes</span></button></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3 class="section__title">Points à proximité</h3>
-        <div class="geo-card" id="geo-wrap-aide">
-          <div class="geo-state">
-            <p>Trouvez de l'eau et des lieux frais à proximité.</p>
-            <button class="btn btn--green btn--sm" onclick="locateUser('aide')">Voir les points à proximité</button>
-          </div>
-        </div>
-        <div id="route-panel"></div>
-        <div id="nearby-list"></div>
-      </div>
-
-      <div class="section">
-        <h3 class="section__title">Relais &amp; accompagnement</h3>
-        <div class="msg-card">Prévenez un proche si possible, ou orientez la personne vers une association, une téléassistance ou un professionnel de santé. Restez avec elle jusqu'au relais.</div>
-      </div>
-
-      <button class="btn btn--green" onclick="go('alert')">Alerter les personnes autour</button>
-      <button class="btn btn--ghost-red" onclick="go('urgence')">L'état s'aggrave ? Appeler les secours</button>
-
     </div>
+
   </div>
 
   <!-- ══════════════════════════════════════════

@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 /* ── State ── */
 const state = {
@@ -365,39 +365,66 @@ function renderGeoFor(target) {
   const wrap = document.getElementById(target === 'aide' ? 'geo-wrap-aide' : 'geo-wrap');
   if (!wrap) return;
 
+  // Urgence : adresse seule, sans carte
+  if (target === 'urgence') {
+    if (state.geo.status === 'loading') {
+      wrap.innerHTML = '<div class="urg-addr-inner urg-addr-loading"><span class="spinner spinner--sm"></span><span>Localisation en cours…</span></div>';
+      return;
+    }
+    if (state.geo.status === 'error') {
+      wrap.innerHTML = `<div class="urg-addr-inner">
+        <div class="urg-addr-chip">Localisation</div>
+        <div class="urg-addr-row">
+          <span class="urg-addr-pin">&#9888;</span>
+          <div>
+            <div class="urg-addr-label">Position indisponible</div>
+            <div class="urg-addr-text">Donnez votre adresse et des repères aux secours</div>
+          </div>
+        </div>
+        <button class="btn btn--primary btn--sm" onclick="locateUser('urgence')">Réessayer</button>
+      </div>`;
+      return;
+    }
+    if (state.geo.status === 'ok' && state.geo.lat) {
+      const addrLine = state.geo.addr || (state.geo.lat.toFixed(5) + ', ' + state.geo.lon.toFixed(5));
+      wrap.innerHTML = `<div class="urg-addr-inner">
+        <div class="urg-addr-chip">Localisation</div>
+        <div class="urg-addr-row">
+          <span class="urg-addr-pin">&#128205;</span>
+          <div>
+            <div class="urg-addr-label">Votre adresse en temps réel</div>
+            <div class="urg-addr-text">${addrLine}</div>
+          </div>
+        </div>
+      </div>`;
+      return;
+    }
+    wrap.innerHTML = '<div class="urg-addr-inner urg-addr-loading"><span class="spinner spinner--sm"></span><span>Détection en cours…</span></div>';
+    return;
+  }
+
+  // Aide : carte Leaflet + liste POI
   if (state.geo.status === 'loading') {
-    wrap.innerHTML = `<div class="geo-state"><span class="spinner"></span><p>Localisation en cours…</p></div>`;
+    wrap.innerHTML = '<div class="geo-state"><span class="spinner"></span><p>Localisation en cours…</p></div>';
     return;
   }
   if (state.geo.status === 'error') {
     wrap.innerHTML = `<div class="geo-state">
-      <p>${target === 'urgence' ? 'Position indisponible. Donnez votre adresse et des repères aux secours.' : 'Activez la localisation pour afficher les points à proximité.'}</p>
-      <button class="btn btn--${target === 'aide' ? 'green' : 'primary'} btn--sm" onclick="locateUser('${target}')">Réessayer</button>
+      <p>Activez la localisation pour afficher les points à proximité.</p>
+      <button class="btn btn--green btn--sm" onclick="locateUser('aide')">Réessayer</button>
     </div>`;
     return;
   }
   if (state.geo.status === 'ok' && state.geo.lat) {
-    const mapsUrl = `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lon}`;
-    wrap.innerHTML = `
-      <div class="geo-card__map" id="leaflet-map-${target}"></div>
-      <div class="geo-card__info">
-        ${state.geo.addr ? `<p class="geo-card__addr">${state.geo.addr}</p>` : ''}
-        <p class="geo-card__coords">${state.geo.lat.toFixed(5)}, ${state.geo.lon.toFixed(5)}${state.geo.acc ? ` · ± ${state.geo.acc} m` : ''}</p>
-        <div class="geo-card__btns">
-          <a class="btn btn--ghost btn--sm" href="${mapsUrl}" target="_blank" rel="noopener">Ouvrir dans Maps</a>
-          <button class="btn btn--ghost btn--sm" onclick="locateUser('${target}')">Actualiser</button>
-        </div>
-      </div>`;
-    initLeafletFor(target);
+    wrap.innerHTML = '<div id="leaflet-map-aide" style="width:100%;height:100%"></div>';
+    initLeafletFor('aide');
     return;
   }
-  const btnLabel = target === 'aide' ? 'Voir les points à proximité' : 'Localiser';
   wrap.innerHTML = `<div class="geo-state">
-    <p>${target === 'aide' ? 'Trouvez de l\'eau et des lieux frais à proximité.' : 'Activez la localisation pour transmettre votre position aux secours.'}</p>
-    <button class="btn btn--${target === 'aide' ? 'green' : 'primary'} btn--sm" onclick="locateUser('${target}')">${btnLabel}</button>
+    <p>Trouvez de l'eau et des lieux frais à proximité.</p>
+    <button class="btn btn--green btn--sm" onclick="locateUser('aide')">Voir les points à proximité</button>
   </div>`;
 }
-
 function initLeafletFor(target) {
   if (typeof L === 'undefined') return;
   const el = document.getElementById(`leaflet-map-${target}`);
@@ -497,7 +524,13 @@ function render() {
   if (el) el.classList.add('active');
   if (state.screen === 'eval')    renderEval();
   if (state.screen === 'urgence') renderGeoFor('urgence');
-  if (state.screen === 'aide')    { renderGeoFor('aide'); renderNearby(); }
+  if (state.screen === 'aide') {
+    renderGeoFor('aide');
+    const rp = document.getElementById('route-panel');
+    if (rp && !rp.querySelector('.route-panel')) {
+      rp.innerHTML = '<p class="aide-panel-hint">Appuyez sur un point de la carte pour voir l\'itinéraire</p>';
+    }
+  }
   window.scrollTo(0, 0);
 }
 

@@ -1,5 +1,5 @@
 /* ===== YANN — Design System ===== */
-@import url('https://fonts.googleapis.com/css2?family=DynaPuff:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 /* ── Tokens ── */
 :root {
@@ -23,7 +23,7 @@
   --shadow-card: 0 10px 24px -20px rgba(20,30,55,.4);
   --shadow-btn:  0 14px 26px -14px rgba(65,95,245,.5);
 
-  --font-title: 'DynaPuff', system-ui, sans-serif;
+  --font-title: 'Montserrat', system-ui, sans-serif;
   --font-body:  'Poppins', system-ui, sans-serif;
   --base: 17px;
 }
@@ -277,6 +277,117 @@ img { max-width: 100%; }
 .btn--yesno {
   min-height: 60px;
   font-size: 1.05rem;
+}
+
+/* ── Écran urgence (redesign) ── */
+.urg-nav {
+  padding: 16px 20px 0;
+  flex-shrink: 0;
+}
+.urg-body {
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
+  min-height: 0;
+}
+.urg-title {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--c-ink);
+  line-height: 1.15;
+  flex-shrink: 0;
+}
+.urg-addr-card {
+  background: var(--c-primary-lt);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+.urg-addr-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.urg-addr-loading {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: .88rem;
+  color: var(--c-muted);
+}
+.urg-addr-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--c-primary);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border-radius: 99px;
+  padding: 3px 10px;
+  width: fit-content;
+}
+.urg-addr-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.urg-addr-pin {
+  color: var(--c-primary);
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.urg-addr-label {
+  font-size: .78rem;
+  color: var(--c-muted);
+  line-height: 1.3;
+}
+.urg-addr-text {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--c-primary);
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.urg-call-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+.urg-call-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--c-red);
+  color: #fff;
+  box-shadow: 0 20px 50px -10px rgba(220,74,42,.45);
+  transition: opacity .15s, transform .12s;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.urg-call-btn:active { opacity: .85; transform: scale(.95); }
+.urg-call-icon { width: 54px; height: 54px; flex-shrink: 0; }
+.urg-call-label {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: .95rem;
+  letter-spacing: .12em;
+}
+.urg-sms-btn {
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 /* ── Banner ── */
@@ -669,6 +780,75 @@ img { max-width: 100%; }
   border: 3px solid #fff;
   box-shadow: 0 2px 8px rgba(65,95,245,.5);
 }
+
+/* ── Écran aide : carte plein écran + panneau bas ── */
+#screen-aide { overflow: hidden; }
+
+.aide-map-zone {
+  flex: 0 0 70%;
+  position: relative;
+  background: var(--c-primary-lt);
+  overflow: hidden;
+}
+.aide-back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.aide-map-inner {
+  width: 100%;
+  height: 100%;
+}
+.aide-geo-idle {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.aide-geo-idle p { font-size: .9rem; color: var(--c-muted); }
+#screen-aide .geo-state {
+  height: 100%;
+  justify-content: center;
+}
+/* Le div map Leaflet doit remplir toute la zone */
+#screen-aide #geo-wrap-aide .geo-card__map,
+#screen-aide #geo-wrap-aide #leaflet-map-aide {
+  width: 100%;
+  height: 100%;
+}
+
+.aide-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px 24px;
+  overflow-y: auto;
+  background: var(--c-bg);
+  min-height: 0;
+}
+.aide-panel-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--c-border);
+  margin: 0 auto 12px;
+  flex-shrink: 0;
+}
+.aide-panel-hint {
+  font-size: .88rem;
+  color: var(--c-muted);
+  text-align: center;
+  padding: 12px 0 4px;
+}
+#route-panel { display: flex; flex-direction: column; gap: 8px; }
 
 /* ── Responsive large écran ── */
 @media (min-width: 560px) {
