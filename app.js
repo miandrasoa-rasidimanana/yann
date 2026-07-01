@@ -12,7 +12,7 @@ const state = {
 };
 
 const QUESTIONS = [
-  'La personne vous répond-elle ?',
+  'La personne est-elle inconsciente ?',
   'Respire-t-elle difficilement ?',
   'Confusion, incohérence, vomissements ?',
   'Son état s\'aggrave t-il rapidement ?',
