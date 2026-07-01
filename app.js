@@ -72,12 +72,12 @@ function closeFinPopup() {
 }
 
 function openInfoPopup() {
+  go('comment-agir');
   document.getElementById('popup-info').classList.remove('hidden');
 }
 
 function closeInfoPopup() {
   document.getElementById('popup-info').classList.add('hidden');
-  go('comment-agir');
 }
 
 function startEval() { state.step = 0; go('eval'); }
