@@ -71,6 +71,15 @@ function closeFinPopup() {
   document.getElementById('popup-fin').classList.add('hidden');
 }
 
+function openInfoPopup() {
+  document.getElementById('popup-info').classList.remove('hidden');
+}
+
+function closeInfoPopup() {
+  document.getElementById('popup-info').classList.add('hidden');
+  go('comment-agir');
+}
+
 function startEval() { state.step = 0; go('eval'); }
 
 /* ── Checklist ── */

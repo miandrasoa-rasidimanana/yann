@@ -31,7 +31,7 @@
 
       <div class="home-actions">
         <button class="btn btn--primary" onclick="startEval()">J'interviens</button>
-        <button class="btn btn--ghost" onclick="go('comment-agir')">S'informer</button>
+        <button class="btn btn--ghost" onclick="openInfoPopup()">S'informer</button>
       </div>
 
       <p class="foot-note">Sans compte, sans connexion.<br><strong>En cas de détresse vital, composez le 112.</strong></p>
@@ -266,13 +266,13 @@
       <!-- Gestes à faire -->
       <h2 class="agir-section-title">Gestes à faire</h2>
       <div class="card">
-        <ul class="checklist">
-          <li><button class="check-item" data-check="agir-1" onclick="toggle('agir-1')"><span class="check-box"></span><span class="check-label">Installez-la assise ou allongée au calme</span></button></li>
-          <li><button class="check-item" data-check="agir-2" onclick="toggle('agir-2')"><span class="check-box"></span><span class="check-label">Desserrez ses vêtements</span></button></li>
-          <li><button class="check-item" data-check="agir-3" onclick="toggle('agir-3')"><span class="check-box"></span><span class="check-label">Rafraîchissez : linge humide sur le front, la nuque et les poignets</span></button></li>
-          <li><button class="check-item" data-check="agir-4" onclick="toggle('agir-4')"><span class="check-box"></span><span class="check-label">Faites-la boire par petites gorgées si elle est consciente</span></button></li>
-          <li><button class="check-item" data-check="agir-5" onclick="toggle('agir-5')"><span class="check-box"></span><span class="check-label">Surveillez son état et parlez-lui régulièrement</span></button></li>
-          <li><button class="check-item" data-check="agir-6" onclick="toggle('agir-6')"><span class="check-box"></span><span class="check-label">Appelez le 112 si l'état s'aggrave ou ne s'améliore pas</span></button></li>
+        <ul class="dot-list">
+          <li>Installez-la assise ou allongée au calme</li>
+          <li>Desserrez ses vêtements</li>
+          <li>Rafraîchissez : linge humide sur le front, la nuque et les poignets</li>
+          <li>Faites-la boire par petites gorgées si elle est consciente</li>
+          <li>Surveillez son état et parlez-lui régulièrement</li>
+          <li>Appelez le 112 si l'état s'aggrave ou ne s'améliore pas</li>
         </ul>
       </div>
 
@@ -315,6 +315,17 @@
   </div>
 
 </div><!-- #app -->
+
+<!-- Pop-up "S'informer" -->
+<div id="popup-info" class="popup-overlay hidden">
+  <div class="popup-card">
+    <button class="popup-close" onclick="closeInfoPopup()" aria-label="Fermer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </button>
+    <img src="Yann_hipo_logo.svg" alt="YANN" class="popup-logo">
+    <p class="popup-title">Nos conseils pour aider les personnes <span style="color:var(--c-primary);font-weight:700;">vulnérables</span></p>
+  </div>
+</div>
 
 <!-- Pop-up fin de parcours "Non" -->
 <div id="popup-fin" class="popup-overlay hidden">
