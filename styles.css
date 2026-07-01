@@ -1013,6 +1013,58 @@ img { max-width: 100%; }
 }
 .agir-carte-btn:active { opacity: .85; transform: translateX(-50%) scale(.97); }
 
+/* ── Pop-up fin de parcours ── */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(25, 0, 44, 0.25);
+  backdrop-filter: blur(2px);
+}
+.popup-overlay.hidden { display: none; }
+.popup-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px 24px 28px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 8px 40px rgba(25,0,44,.18);
+}
+.popup-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  transition: opacity .15s;
+}
+.popup-close:active { opacity: .7; }
+.popup-logo {
+  width: 110px;
+  margin: 0 auto 20px;
+  display: block;
+}
+.popup-title {
+  font-family: var(--font-title);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--c-ink);
+  margin-bottom: 8px;
+}
+.popup-text {
+  font-size: .95rem;
+  color: var(--c-ink);
+  line-height: 1.55;
+}
+
 /* ── Responsive large écran ── */
 @media (min-width: 560px) {
   body { background: var(--c-border); align-items: center; min-height: 100vh; }

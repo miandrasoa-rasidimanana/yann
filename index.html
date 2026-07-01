@@ -316,6 +316,18 @@
 
 </div><!-- #app -->
 
+<!-- Pop-up fin de parcours "Non" -->
+<div id="popup-fin" class="popup-overlay hidden">
+  <div class="popup-card">
+    <button class="popup-close" onclick="closeFinPopup()" aria-label="Fermer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </button>
+    <img src="Yann_hipo_logo.svg" alt="YANN" class="popup-logo">
+    <p class="popup-title">Merci pour ton aide.</p>
+    <p class="popup-text">Pas de danger immédiat. Un <span style="color:var(--c-primary);font-weight:700;">point fraîcheur</span> à proximité lui sera bénéfique.</p>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
 </body>

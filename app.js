@@ -60,10 +60,15 @@ function answerNo() {
     state.screen = 'aide';
     render();
     locateUser('aide');
+    document.getElementById('popup-fin').classList.remove('hidden');
   } else {
     state.step++;
     renderEval();
   }
+}
+
+function closeFinPopup() {
+  document.getElementById('popup-fin').classList.add('hidden');
 }
 
 function startEval() { state.step = 0; go('eval'); }
