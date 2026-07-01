@@ -706,7 +706,7 @@ img { max-width: 100%; }
 .route-panel--error { border-color: var(--c-red); font-size: .88rem; color: var(--c-red-ink); }
 .route-panel--arrived { border-color: var(--c-green); }
 
-.route-panel__icon { font-size: 1.4rem; flex-shrink: 0; }
+.route-panel__icon { width: 36px; height: 36px; flex-shrink: 0; object-fit: contain; }
 .route-panel__body { display: flex; flex-direction: column; flex: 1; gap: 2px; min-width: 0; }
 .route-panel__name { font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .route-panel__meta { font-size: .8rem; color: var(--c-muted); }

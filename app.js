@@ -12,11 +12,10 @@ const state = {
 };
 
 const QUESTIONS = [
-  'La personne est-elle inconsciente ou ne répond pas ?',
-  'Respire-t-elle difficilement, ou pas du tout ?',
-  'Confusion, propos incohérents, convulsions ou vomissements ?',
-  'Peau très chaude et sèche, ou température très élevée ?',
-  'Son état s\'aggrave-t-il rapidement ?',
+  'La personne vous répond-elle ?',
+  'Respire-t-elle difficilement ?',
+  'Confusion, incohérence, vomissements ?',
+  'Son état s\'aggrave t-il rapidement ?',
 ];
 
 // Illustration associée à chaque question (null = pas d'image)
@@ -24,7 +23,6 @@ const QUESTION_ICONS = [
   'icones/inconsciente.svg',
   'icones/2.svg',
   'icones/3.svg',
-  'icones/4.svg',
   'icones/5.svg',
 ];
 
@@ -235,14 +233,14 @@ function addPoiMarkers() {
   if (!map || !state.nearby.length) return;
   poiMarkers.forEach(m => m.remove());
   poiMarkers = [];
+  const yannIcon = L.icon({
+    iconUrl: 'Yann_hipo_logo.svg',
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -20],
+  });
   state.nearby.forEach((poi, index) => {
-    const color = poi.amenity === 'drinking_water' ? '#0F8A5B' : '#7742FE';
-    const icon = L.divIcon({
-      className: 'poi-pin',
-      html: `<span class="poi-pin__dot" style="background:${color}">${iconAmenity(poi.amenity)}</span>`,
-      iconSize: [32, 32], iconAnchor: [16, 16],
-    });
-    const marker = L.marker([poi.lat, poi.lon], { icon })
+    const marker = L.marker([poi.lat, poi.lon], { icon: yannIcon })
       .addTo(map)
       .bindPopup(`<strong>${poi.name}</strong><br>${poi.dist} m`)
       .on('click', () => showRoute(index));
@@ -346,7 +344,7 @@ function renderRoutePanel({ status, poi, distM, minWalk }) {
 
   panel.innerHTML = `
     <div class="route-panel">
-      <div class="route-panel__icon">${iconAmenity(poi.amenity)}</div>
+      <img class="route-panel__icon" src="Yann_hipo_logo.svg" alt="">
       <div class="route-panel__body">
         <div class="route-panel__name">${poi.name}</div>
         <div class="route-panel__meta" id="route-remaining">🚶 ${minWalk} min · ${dist}</div>
