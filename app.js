@@ -59,7 +59,6 @@ function answerNo() {
     state.hist.push(state.screen);
     state.screen = 'aide';
     render();
-    locateUser('aide');
     document.getElementById('popup-fin').classList.remove('hidden');
   } else {
     state.step++;
@@ -69,6 +68,7 @@ function answerNo() {
 
 function closeFinPopup() {
   document.getElementById('popup-fin').classList.add('hidden');
+  locateUser('aide');
 }
 
 function openInfoPopup() {
@@ -248,7 +248,7 @@ function addPoiMarkers() {
   poiMarkers.forEach(m => m.remove());
   poiMarkers = [];
   const yannIcon = L.icon({
-    iconUrl: 'Yann_hipo_logo.svg',
+    iconUrl: 'Yann_hipo_icon.svg',
     iconSize: [36, 36],
     iconAnchor: [18, 18],
     popupAnchor: [0, -20],
